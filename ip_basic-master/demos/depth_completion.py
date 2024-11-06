@@ -19,9 +19,9 @@ def main():
     # Options
     ##############################
     # Validation set
-    input_depth_dir = os.path.dirname('../../datasets/sparse_depth/')
+    input_depth_dir = '../../datasets/sparse_depth/'
+    print("Absolute input path:", os.path.abspath(input_depth_dir))
     data_split = 'val'
-    print(input_depth_dir)
 
     # Test set
     # input_depth_dir = os.path.expanduser(
@@ -90,7 +90,7 @@ def main():
 
     # Get images in sorted order
     images_to_use = sorted(glob.glob(input_depth_dir + '/*'))
-    print(f"image to use: {images_to_use}")
+    print(f"images to use: {images_to_use}")
 
     # Rolling average array of times for time estimation
     avg_time_arr_length = 10
