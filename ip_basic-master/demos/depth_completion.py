@@ -89,6 +89,7 @@ def main():
 
     # Get images in sorted order
     images_to_use = sorted(glob.glob(input_depth_dir + '/*'))
+    print(images_to_use)
 
     # Rolling average array of times for time estimation
     avg_time_arr_length = 10
@@ -99,6 +100,7 @@ def main():
     for i in range(num_images):
 
         depth_image_path = images_to_use[i]
+        print("Processing image:", depth_image_path)
 
         # Calculate average time with last n fill times
         avg_fill_time = np.mean(last_fill_times)
@@ -118,6 +120,7 @@ def main():
 
         # Load depth projections from uint16 image
         depth_image = cv2.imread(depth_image_path, cv2.IMREAD_ANYDEPTH)
+        print(depth_image.dtype, depth_image.shape)
         projected_depths = np.float32(depth_image / 256.0)
 
         # Fill in
