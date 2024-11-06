@@ -55,7 +55,7 @@ depth_map[np.isinf(depth_map)] = 0
 depth_map_uint16 = (depth_map * 256).astype(np.uint16)
 
 # Save the depth map as a 16-bit PNG file
-output_path = "test_depth.png"
+output_path = "datasets/sparse_depth/test_depth.png"
 with open(output_path, 'wb') as f:
     writer = png.Writer(width=depth_map_uint16.shape[1],
                         height=depth_map_uint16.shape[0],
