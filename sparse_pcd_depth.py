@@ -1,8 +1,9 @@
 import open3d as o3d
 import numpy as np
 import cv2
+import png
 
-pcd = o3d.io.read_point_cloud("data/lidar/0.pcd")
+pcd = o3d.io.read_point_cloud("datasets/data/lidar/0.pcd")
 
 # o3d.visualization.draw_geometries([pcd])
 
@@ -50,12 +51,16 @@ for point in points:
 # convert depth values of inf to 0 for better visualization
 depth_map[np.isinf(depth_map)] = 0
 
-# normalize depth map for visualization purposes
-depth_map_normalized = cv2.normalize(depth_map, None, 0, 255, cv2.NORM_MINMAX)
-depth_map_normalized = depth_map_normalized.astype(np.uint8)
-colored_depth_map = cv2.applyColorMap(depth_map_normalized, cv2.COLORMAP_PINK)
+# Scale the depth map to match KITTI’s format (depth values * 256) and convert to uint16
+depth_map_uint16 = (depth_map * 256).astype(np.uint16)
 
-cv2.imshow("depth", colored_depth_map)
-cv2.imwrite("test.png", colored_depth_map)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# Save the depth map as a 16-bit PNG file
+output_path = "test_depth.png"
+with open(output_path, 'wb') as f:
+    writer = png.Writer(width=depth_map_uint16.shape[1],
+                        height=depth_map_uint16.shape[0],
+                        bitdepth=16,
+                        greyscale=True)
+    writer.write(f, depth_map_uint16.tolist())
+
+print(f"Depth map saved to {output_path}")
