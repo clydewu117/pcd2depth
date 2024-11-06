@@ -19,7 +19,7 @@ def main():
     # Options
     ##############################
     # Validation set
-    input_depth_dir = os.path.dirname('../../datasets/sparse_depth')
+    input_depth_dir = os.path.dirname('../../datasets/sparse_depth/')
     data_split = 'val'
     print(input_depth_dir)
 
