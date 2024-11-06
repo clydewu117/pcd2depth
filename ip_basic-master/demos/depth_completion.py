@@ -19,8 +19,7 @@ def main():
     # Options
     ##############################
     # Validation set
-    input_depth_dir = os.path.expanduser(
-        '~/Kitti/depth/depth_selection/val_selection_cropped/velodyne_raw')
+    input_depth_dir = os.path.dirname('../../datasets/sparse_depth')
     data_split = 'val'
 
     # Test set
