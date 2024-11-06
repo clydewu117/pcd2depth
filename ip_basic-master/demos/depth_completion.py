@@ -89,7 +89,7 @@ def main():
 
     # Get images in sorted order
     images_to_use = sorted(glob.glob(input_depth_dir + '/*'))
-    print(images_to_use)
+    print(f"image to use: {images_to_use}")
 
     # Rolling average array of times for time estimation
     avg_time_arr_length = 10
@@ -97,6 +97,7 @@ def main():
     last_total_times = np.repeat([1.0], avg_time_arr_length)
 
     num_images = len(images_to_use)
+    print(f"number of images: {num_images}")
     for i in range(num_images):
 
         depth_image_path = images_to_use[i]
