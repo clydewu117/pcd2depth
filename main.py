@@ -37,16 +37,16 @@ print("Starting processing point cloud")
 for item in os.listdir(pcd_dict):
     pcd_path = os.path.join(pcd_dict, item)
     item_name, extension = os.path.splitext(item)
-    # print(f"Processing {item}")
+
+    print(f"Processing {item}")
     out_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
     out_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
-    #
-    # pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, out_path_cam2)
-    # pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, out_path_cam3)
-    # print(f"Done processing {item}")
+
+    pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, out_path_cam2)
+    pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, out_path_cam3)
+    print(f"Done processing {item}")
 
     print(f"Overlaying depth points from {item}")
-
     image_path_cam2 = os.path.join(cam2_dict, f"{item_name}.png")
     image_path_cam3 = os.path.join(cam3_dict, f"{item_name}.png")
     out_path_final2 = os.path.join(out_final_cam2, f"{item_name}_final.png")

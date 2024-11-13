@@ -12,6 +12,8 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
 
     radius = 5
 
+    count = 0
+
     for point in points:
         x, y, z = point
         point_3d = np.array([x, y, z, 1])
@@ -31,6 +33,7 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
                 cv2.circle(mask, (u, v), radius, 1, thickness=-1)
                 mask_indices = mask == 1
                 depth_map[mask_indices] = np.minimum(depth_map[mask_indices], w)
+                count += 1
 
     depth_map[np.isinf(depth_map)] = 0
     depth_map_uint16 = (depth_map * 256).astype(np.uint16)
@@ -42,6 +45,7 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
                             greyscale=True)
         writer.write(f, depth_map_uint16.tolist())
 
+    print(f"{count} depth points within the range")
     print(f"Depth map saved to {out_path}")
 
 
