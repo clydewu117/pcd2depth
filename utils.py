@@ -19,21 +19,20 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
         point_3d = np.array([x, y, z, 1])
 
         # project to 2D, ignore the points behind the camera
-        if z > 0:
-            # world to camera
-            point_cam = ex_mat @ point_3d  # (4x4) mult (4x1) = (4x1)
-            # camera to pixel
-            point_px = in_mat @ point_cam  # (3x4) mult (4x1) = (3x1)
+        # world to camera
+        point_cam = ex_mat @ point_3d  # (4x4) mult (4x1) = (4x1)
+        # camera to pixel
+        point_px = in_mat @ point_cam  # (3x4) mult (4x1) = (3x1)
 
-            w = point_px[2]
-            u, v = int(point_px[0] / w), int(point_px[1] / w)
+        w = point_px[2]
+        u, v = int(point_px[0] / w), int(point_px[1] / w)
 
-            if 0 <= v < height and 0 <= u < width:
-                mask = np.zeros_like(depth_map, dtype=np.uint8)
-                cv2.circle(mask, (u, v), radius, 1, thickness=-1)
-                mask_indices = mask == 1
-                depth_map[mask_indices] = np.minimum(depth_map[mask_indices], w)
-                count += 1
+        if 0 <= v < height and 0 <= u < width:
+            mask = np.zeros_like(depth_map, dtype=np.uint8)
+            cv2.circle(mask, (u, v), radius, 1, thickness=-1)
+            mask_indices = mask == 1
+            depth_map[mask_indices] = np.minimum(depth_map[mask_indices], w)
+            count += 1
 
     depth_map[np.isinf(depth_map)] = 0
     depth_map_uint16 = (depth_map * 256).astype(np.uint16)
