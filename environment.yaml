@@ -1,0 +1,12 @@
+name: pcd2depth
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - open3d
+  - numpy
+  - opencv
+  - pip
+  - pip:
+      - pypng
