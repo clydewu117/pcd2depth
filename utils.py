@@ -18,7 +18,6 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
         x, y, z = point
         point_3d = np.array([x, y, z, 1])
 
-        # project to 2D, ignore the points behind the camera
         # world to camera
         point_cam = ex_mat @ point_3d  # (4x4) mult (4x1) = (4x1)
         # camera to pixel
@@ -61,3 +60,28 @@ def depth_overlay(depth_path, img_path, out_path):
     cv2.imwrite(out_path, overlaid_image)
 
     print(f"Image with depth saved to {out_path}")
+
+
+def get_stats(pcd_path, width, height, in_mat, ex_mat):
+    pcd = o3d.io.read_point_cloud(pcd_path)
+    points = np.asarray(pcd.points)
+    count = 0
+    depth_arr = []
+
+    for point in points:
+        x, y, z = point
+        point_3d = np.array([x, y, z, 1])
+
+        # world to camera
+        point_cam = ex_mat @ point_3d  # (4x4) mult (4x1) = (4x1)
+        # camera to pixel
+        point_px = in_mat @ point_cam  # (3x4) mult (4x1) = (3x1)
+
+        w = point_px[2]
+        u, v = int(point_px[0] / w), int(point_px[1] / w)
+
+        if 0 <= v < height and 0 <= u < width:
+            count += 1
+            depth_arr.append(w)
+
+    return count, depth_arr

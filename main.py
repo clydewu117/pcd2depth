@@ -1,5 +1,6 @@
 import os
-from utils import pcd2depth, depth_overlay
+from utils import pcd2depth, depth_overlay, get_stats
+import statistics
 
 cam2_dict = "datasets/data/cam2_img"
 cam3_dict = "datasets/data/cam3_img"
@@ -32,28 +33,53 @@ height = 3648
 
 count = 0
 
-print("Starting processing point cloud")
+# print("Starting processing point cloud")
+#
+# for item in os.listdir(pcd_dict):
+#     pcd_path = os.path.join(pcd_dict, item)
+#     item_name, extension = os.path.splitext(item)
+#
+#     print(f"Processing {item}")
+#     out_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
+#     out_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
+#
+#     pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, out_path_cam2)
+#     pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, out_path_cam3)
+#     print(f"Done processing {item}")
+#
+#     print(f"Overlaying depth points from {item}")
+#     image_path_cam2 = os.path.join(cam2_dict, f"{item_name}.png")
+#     image_path_cam3 = os.path.join(cam3_dict, f"{item_name}.png")
+#     out_path_final2 = os.path.join(out_final_cam2, f"{item_name}_final.png")
+#     out_path_final3 = os.path.join(out_final_cam3, f"{item_name}_final.png")
+#
+#     depth_overlay(out_path_cam2, image_path_cam2, out_path_final2)
+#     depth_overlay(out_path_cam3, image_path_cam3, out_path_final3)
+#     print(f"Done overlaying depth points from {item}")
+#
+# print("Finished")
+
+count_arr = []
+depth_arr = []
+sample_count = 0
 
 for item in os.listdir(pcd_dict):
+    sample_count += 1
     pcd_path = os.path.join(pcd_dict, item)
-    item_name, extension = os.path.splitext(item)
+    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam2_in_mat, cam2_ex_mat)
+    count_arr.append(cur_count)
+    depth_arr += cur_depth_arr
+    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
+    count_arr.append(cur_count)
+    depth_arr += cur_depth_arr
 
-    print(f"Processing {item}")
-    out_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
-    out_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
+with open("stats.txt", "w") as file:
+    file.write(f"size of dataset: {sample_count}\n")
+    file.write(f"image size: {width}x{height}\n")
+    file.write(f"average number of points in each image: {statistics.mean(count_arr)}\n")
+    file.write(f"median number of points in each image: {statistics.median(count_arr)}\n")
+    file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
+    file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
+    file.write(f"min depth of points: {min(depth_arr)}\n")
+    file.write(f"max depth of points: {max(depth_arr)}\n")
 
-    pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, out_path_cam2)
-    pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, out_path_cam3)
-    print(f"Done processing {item}")
-
-    print(f"Overlaying depth points from {item}")
-    image_path_cam2 = os.path.join(cam2_dict, f"{item_name}.png")
-    image_path_cam3 = os.path.join(cam3_dict, f"{item_name}.png")
-    out_path_final2 = os.path.join(out_final_cam2, f"{item_name}_final.png")
-    out_path_final3 = os.path.join(out_final_cam3, f"{item_name}_final.png")
-
-    depth_overlay(out_path_cam2, image_path_cam2, out_path_final2)
-    depth_overlay(out_path_cam3, image_path_cam3, out_path_final3)
-    print(f"Done overlaying depth points from {item}")
-
-print("Finished")
