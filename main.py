@@ -1,5 +1,5 @@
 import os
-from utils import pcd2depth, depth_overlay, get_stats, report_noise
+from utils import pcd2depth, depth_overlay, get_stats
 import statistics
 import matplotlib.pyplot as plt
 import time
