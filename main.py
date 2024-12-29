@@ -1,8 +1,8 @@
 import os
 from utils import pcd2depth, depth_overlay, get_stats
-import statistics
-import matplotlib.pyplot as plt
-import time
+# import statistics
+# import matplotlib.pyplot as plt
+# import time
 
 
 cam2_dir = "datasets/data_all/cam2_img"
