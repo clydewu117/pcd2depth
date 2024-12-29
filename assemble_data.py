@@ -29,7 +29,9 @@ with open(log_file_path, "w") as log_file:
         print(f"Copying {src_dir}, {num_files} samples in total")
 
         pre_count = count
-        for item in sorted(os.listdir(src_lidar_dir)):
+
+        sorted_files = sorted(os.listdir(src_lidar_dir), key=lambda x: int(os.path.splitext(x)[0]))
+        for item in sorted_files:
             src_name = os.path.splitext(item)[0]
             des_name = str(count)
             print(f"Copying {src_name} in src to {des_name} in des")
