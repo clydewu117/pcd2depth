@@ -1,10 +1,13 @@
 import os
-from utils import pcd2depth, depth_overlay, get_stats
+from utils import pcd2depth, depth_overlay, get_stats, report_noise
 import statistics
+import matplotlib.pyplot as plt
+import time
 
-cam2_dict = "datasets/data/cam2_img"
-cam3_dict = "datasets/data/cam3_img"
-pcd_dict = "datasets/data/lidar"
+
+cam2_dir = "datasets/data/cam2_img"
+cam3_dir = "datasets/data/cam3_img"
+pcd_dir = "datasets/data/lidar"
 out_depth_cam2 = "datasets/out/cam2_depth"
 out_depth_cam3 = "datasets/out/cam3_depth"
 out_final_cam2 = "datasets/out/cam2_final"
@@ -28,58 +31,83 @@ cam3_ex_mat = [[0.999799, -0.00445795, 0.0110814, 0.233303],
                [0.00468311, 0.999844, -0.00444752, 0.207738],
                [0, 0, 0, 1]]
 
+matrices_cam2 = [cam2_ex_mat, cam2_in_mat]
+matrices_cam3 = [cam3_ex_mat, cam3_in_mat]
+
 width = 5472
 height = 3648
 
 count = 0
 
-# print("Starting processing point cloud")
+# read pcd file and generate gray scale depth map
+print("Start processing point cloud")
+
+for item in os.listdir(pcd_dir):
+    pcd_path = os.path.join(pcd_dir, item)
+    item_name = os.path.splitext(item)[0]
+
+    print(f"Processing {item}")
+    out_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
+    out_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
+
+    pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, out_path_cam2)
+    pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, out_path_cam3)
+    print(f"Done processing {item}")
+
+    print(f"Overlaying depth points from {item}")
+    image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
+    image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
+    out_path_final2 = os.path.join(out_final_cam2, f"{item_name}_final.png")
+    out_path_final3 = os.path.join(out_final_cam3, f"{item_name}_final.png")
+
+    depth_overlay(out_path_cam2, image_path_cam2, out_path_final2)
+    depth_overlay(out_path_cam3, image_path_cam3, out_path_final3)
+    print(f"Done overlaying depth points from {item}")
+
+print("Finished")
+
+# get stats from the dataset
+# count_arr = []
+# depth_arr = []
+# sample_count = 0
 #
-# for item in os.listdir(pcd_dict):
-#     pcd_path = os.path.join(pcd_dict, item)
+# for item in os.listdir(pcd_dir):
+#     sample_count += 1
+#     pcd_path = os.path.join(pcd_dir, item)
+#     cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam2_in_mat, cam2_ex_mat)
+#     count_arr.append(cur_count)
+#     depth_arr += cur_depth_arr
+#     cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
+#     count_arr.append(cur_count)
+#     depth_arr += cur_depth_arr
+#
+# with open("stats.txt", "w") as file:
+#     file.write(f"size of dataset: {sample_count}\n")
+#     file.write(f"image size: {width}x{height}\n")
+#     file.write(f"average number of points in each image: {statistics.mean(count_arr)}\n")
+#     file.write(f"median number of points in each image: {statistics.median(count_arr)}\n")
+#     file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
+#     file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
+#     file.write(f"min depth of points: {min(depth_arr)}\n")
+#     file.write(f"max depth of points: {max(depth_arr)}\n")
+
+# report noise
+# noises = []
+#
+# start_time = time.time()
+#
+# for item in os.listdir(pcd_dir):
+#     pcd_path = os.path.join(pcd_dir, item)
 #     item_name, extension = os.path.splitext(item)
+#     image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
+#     image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
+#     noises += report_noise(pcd_path, image_path_cam2, image_path_cam3, width, height, matrices_cam2, matrices_cam3)
 #
-#     print(f"Processing {item}")
-#     out_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
-#     out_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
+# end_time = time.time()
+# elapsed_time = end_time - start_time
+# print(f"Elapsed time: {elapsed_time} seconds")
+# print(f"points: {len(noises)}")
+# print(f"points rgb diff > 10000: {len([x for x in noises if x > 10000])}")
 #
-#     pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, out_path_cam2)
-#     pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, out_path_cam3)
-#     print(f"Done processing {item}")
-#
-#     print(f"Overlaying depth points from {item}")
-#     image_path_cam2 = os.path.join(cam2_dict, f"{item_name}.png")
-#     image_path_cam3 = os.path.join(cam3_dict, f"{item_name}.png")
-#     out_path_final2 = os.path.join(out_final_cam2, f"{item_name}_final.png")
-#     out_path_final3 = os.path.join(out_final_cam3, f"{item_name}_final.png")
-#
-#     depth_overlay(out_path_cam2, image_path_cam2, out_path_final2)
-#     depth_overlay(out_path_cam3, image_path_cam3, out_path_final3)
-#     print(f"Done overlaying depth points from {item}")
-#
-# print("Finished")
-
-count_arr = []
-depth_arr = []
-sample_count = 0
-
-for item in os.listdir(pcd_dict):
-    sample_count += 1
-    pcd_path = os.path.join(pcd_dict, item)
-    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam2_in_mat, cam2_ex_mat)
-    count_arr.append(cur_count)
-    depth_arr += cur_depth_arr
-    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
-    count_arr.append(cur_count)
-    depth_arr += cur_depth_arr
-
-with open("stats.txt", "w") as file:
-    file.write(f"size of dataset: {sample_count}\n")
-    file.write(f"image size: {width}x{height}\n")
-    file.write(f"average number of points in each image: {statistics.mean(count_arr)}\n")
-    file.write(f"median number of points in each image: {statistics.median(count_arr)}\n")
-    file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
-    file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
-    file.write(f"min depth of points: {min(depth_arr)}\n")
-    file.write(f"max depth of points: {max(depth_arr)}\n")
-
+# plt.hist(noises, bins=100, edgecolor='black', alpha=0.7)
+# plt.show()

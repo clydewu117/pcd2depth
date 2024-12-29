@@ -2,6 +2,9 @@ import open3d as o3d
 import numpy as np
 import cv2
 import png
+import math
+from collections import Counter
+from PIL import Image
 
 
 def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
@@ -85,3 +88,54 @@ def get_stats(pcd_path, width, height, in_mat, ex_mat):
             depth_arr.append(w)
 
     return count, depth_arr
+
+
+def report_noise(pcd_path, left_img_path, right_img_path, width, height, matrices_cam2, matrices_cam3):
+    pcd = o3d.io.read_point_cloud(pcd_path)
+    points = np.asarray(pcd.points)
+
+    left_img = Image.open(left_img_path)
+    right_img = Image.open(right_img_path)
+
+    rgb_diffs = []
+    count = 0
+
+    for point in points:
+        x, y, z = point
+        point_3d = np.array([x, y, z, 1])
+
+        # world to camera2
+        point_cam2 = matrices_cam2[0] @ point_3d  # (4x4) mult (4x1) = (4x1)
+        # camera to pixel2
+        point_px2 = matrices_cam2[1] @ point_cam2  # (3x4) mult (4x1) = (3x1)
+
+        # world to camera3
+        point_cam3 = matrices_cam3[0] @ point_3d  # (4x4) mult (4x1) = (4x1)
+        # camera to pixel3
+        point_px3 = matrices_cam3[1] @ point_cam3  # (3x4) mult (4x1) = (3x1)
+
+        w2 = point_px2[2]
+        u2, v2 = int(point_px2[0] / w2), int(point_px2[1] / w2)
+
+        w3 = point_px3[2]
+        u3, v3 = int(point_px3[0] / w3), int(point_px3[1] / w3)
+
+        if 0 <= v2 < height and 0 <= u2 < width and 0 <= v3 < height and 0 <= u3 < width:
+            loc_left = (u2, v2)
+            loc_right = (u3, v3)
+            rgb_diff = compare_rgb(loc_left, loc_right, left_img, right_img)
+            print(f"rgb diff: {rgb_diff}")
+            rgb_diffs.append(rgb_diff)
+
+        count += 1
+        # print(f"processing {count}/{len(points)}")
+
+    return rgb_diffs
+
+
+def compare_rgb(loc_left, loc_right, left_img, right_img):
+
+    r_left, g_left, b_left = left_img.getpixel(loc_left)
+    r_right, g_right, b_right = right_img.getpixel(loc_right)
+
+    return ((r_left-r_right)**2+(g_left-g_right)**2+(b_left-b_right)**2) / 3
