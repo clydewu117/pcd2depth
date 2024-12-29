@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 import time
 
 
-cam2_dir = "datasets/data/cam2_img"
-cam3_dir = "datasets/data/cam3_img"
-pcd_dir = "datasets/data/lidar"
-out_depth_cam2 = "datasets/out/cam2_depth"
-out_depth_cam3 = "datasets/out/cam3_depth"
-out_final_cam2 = "datasets/out/cam2_final"
-out_final_cam3 = "datasets/out/cam3_final"
+cam2_dir = "datasets/data_all/cam2_img"
+cam3_dir = "datasets/data_all/cam3_img"
+pcd_dir = "datasets/data_all/lidar"
+out_depth_cam2 = "datasets/depth_img/cam2_depth"
+out_depth_cam3 = "datasets/depth_img/cam3_depth"
+out_depth_img_cam2 = "datasets/depth_img/cam2_depth_img"
+out_depth_img_cam3 = "datasets/depth_img/cam3_depth_img"
 
 cam2_in_mat = [[31470.1, 0, 2736, 0],
                [0, 30825, 1824, 0],
@@ -47,29 +47,32 @@ for item in os.listdir(pcd_dir):
     item_name = os.path.splitext(item)[0]
 
     print(f"Processing {item}")
-    out_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
-    out_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
+    depth_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
+    depth_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
 
-    pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, out_path_cam2)
-    pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, out_path_cam3)
+    pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, depth_path_cam2)
+    pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, depth_path_cam3)
     print(f"Done processing {item}")
 
     print(f"Overlaying depth points from {item}")
     image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
     image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
-    out_path_final2 = os.path.join(out_final_cam2, f"{item_name}_final.png")
-    out_path_final3 = os.path.join(out_final_cam3, f"{item_name}_final.png")
+    depth_img_path_cam2 = os.path.join(out_depth_img_cam2, f"{item_name}_depth_img.png")
+    depth_img_path_cam3 = os.path.join(out_depth_img_cam3, f"{item_name}_depth_img.png")
 
-    depth_overlay(out_path_cam2, image_path_cam2, out_path_final2)
-    depth_overlay(out_path_cam3, image_path_cam3, out_path_final3)
+    depth_overlay(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
+    depth_overlay(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
     print(f"Done overlaying depth points from {item}")
+    break
 
-print("Finished")
+print("Finished processing point cloud")
 
 # get stats from the dataset
 # count_arr = []
 # depth_arr = []
 # sample_count = 0
+#
+# print("Starting collecting stats")
 #
 # for item in os.listdir(pcd_dir):
 #     sample_count += 1
@@ -90,6 +93,8 @@ print("Finished")
 #     file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
 #     file.write(f"min depth of points: {min(depth_arr)}\n")
 #     file.write(f"max depth of points: {max(depth_arr)}\n")
+#
+# print("Finished collecting stats")
 
 # report noise
 # noises = []
