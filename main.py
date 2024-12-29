@@ -1,6 +1,6 @@
 import os
 from utils import pcd2depth, depth_overlay, get_stats
-# import statistics
+import statistics
 # import matplotlib.pyplot as plt
 # import time
 
@@ -63,38 +63,37 @@ for item in os.listdir(pcd_dir):
     depth_overlay(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
     depth_overlay(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
     print(f"Done overlaying depth points from {item}")
-    break
 
 print("Finished processing point cloud")
 
 # get stats from the dataset
-# count_arr = []
-# depth_arr = []
-# sample_count = 0
-#
-# print("Starting collecting stats")
-#
-# for item in os.listdir(pcd_dir):
-#     sample_count += 1
-#     pcd_path = os.path.join(pcd_dir, item)
-#     cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam2_in_mat, cam2_ex_mat)
-#     count_arr.append(cur_count)
-#     depth_arr += cur_depth_arr
-#     cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
-#     count_arr.append(cur_count)
-#     depth_arr += cur_depth_arr
-#
-# with open("stats.txt", "w") as file:
-#     file.write(f"size of dataset: {sample_count}\n")
-#     file.write(f"image size: {width}x{height}\n")
-#     file.write(f"average number of points in each image: {statistics.mean(count_arr)}\n")
-#     file.write(f"median number of points in each image: {statistics.median(count_arr)}\n")
-#     file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
-#     file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
-#     file.write(f"min depth of points: {min(depth_arr)}\n")
-#     file.write(f"max depth of points: {max(depth_arr)}\n")
-#
-# print("Finished collecting stats")
+count_arr = []
+depth_arr = []
+sample_count = 0
+
+print("Starting collecting stats")
+
+for item in os.listdir(pcd_dir):
+    sample_count += 1
+    pcd_path = os.path.join(pcd_dir, item)
+    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam2_in_mat, cam2_ex_mat)
+    count_arr.append(cur_count)
+    depth_arr += cur_depth_arr
+    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
+    count_arr.append(cur_count)
+    depth_arr += cur_depth_arr
+
+with open("stats.txt", "w") as file:
+    file.write(f"size of dataset: {sample_count}\n")
+    file.write(f"image size: {width}x{height}\n")
+    file.write(f"average number of points in each image: {statistics.mean(count_arr)}\n")
+    file.write(f"median number of points in each image: {statistics.median(count_arr)}\n")
+    file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
+    file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
+    file.write(f"min depth of points: {min(depth_arr)}\n")
+    file.write(f"max depth of points: {max(depth_arr)}\n")
+
+print("Finished collecting stats")
 
 # report noise
 # noises = []
