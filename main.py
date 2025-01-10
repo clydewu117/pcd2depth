@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 cam2_dir = "datasets/data_all/cam2_img"
 cam3_dir = "datasets/data_all/cam3_img"
-pcd_dir = "datasets/data_all/lidar"
+pcd_dir = "datasets/data_raw/lidar"
 out_depth_cam2 = "datasets/depth_img/cam2_depth"
 out_depth_cam3 = "datasets/depth_img/cam3_depth"
 out_depth_img_cam2 = "datasets/depth_img/cam2_depth_img"
