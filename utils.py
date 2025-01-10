@@ -1,3 +1,5 @@
+import os.path
+
 import open3d as o3d
 import numpy as np
 import cv2
@@ -139,3 +141,42 @@ def get_stats(pcd_path, width, height, in_mat, ex_mat):
 #     r_right, g_right, b_right = right_img.getpixel(loc_right)
 #
 #     return ((r_left-r_right)**2+(g_left-g_right)**2+(b_left-b_right)**2) / 3
+
+def eliminate_offset(img1_path, img2_path, save_path):
+    img1 = cv2.imread(img1_path)
+    img2 = cv2.imread(img2_path)
+
+    height, width, _ = img1.shape
+    block_h = 1000
+    
+    cropped = img1[:block_h, :]
+    result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
+    _, _, _, max_loc = cv2.minMaxLoc(result)
+
+    _, match_top = max_loc
+    crop_h = height - match_top
+    print(match_top)
+    print(crop_h)
+
+    cropped_img1 = img1[:crop_h, :]
+    cropped_img2 = img2[match_top:, :]
+
+    save_path_img1 = os.path.join(save_path, 'cropped_image_left.png')
+    save_path_img2 = os.path.join(save_path, 'cropped_image_right.png')
+    cv2.imwrite(save_path_img1, cropped_img1)
+    cv2.imwrite(save_path_img2, cropped_img2)
+
+
+def report_offset(img1_path, img2_path):
+    img1 = cv2.imread(img1_path)
+    img2 = cv2.imread(img2_path)
+
+    height, width, _ = img1.shape
+    block_h = 1000
+
+    cropped = img1[:block_h, :]
+    result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
+    _, _, _, max_loc = cv2.minMaxLoc(result)
+
+    _, match_top = max_loc
+    print(match_top)
