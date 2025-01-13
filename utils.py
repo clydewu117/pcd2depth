@@ -40,6 +40,7 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
 
     depth_map[np.isinf(depth_map)] = 0
     max_depth = np.max(depth_map)
+    depth_map[np.isinf(depth_map)] = max_depth
     depth_map_inverted = max_depth - depth_map
     depth_map_uint16 = (depth_map_inverted * 256).astype(np.uint16)
 
