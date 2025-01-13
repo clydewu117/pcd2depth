@@ -180,3 +180,5 @@ def report_offset(img1_path, img2_path):
 
     _, match_top = max_loc
     print(match_top)
+
+    return match_top

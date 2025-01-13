@@ -1,4 +1,6 @@
 import os
+import statistics
+import matplotlib.pyplot as plt
 
 from utils import eliminate_offset, pcd2depth, depth_overlay, report_offset
 
@@ -27,8 +29,10 @@ ex_mat = [[0.999933899272713, -0.003245217941172, 0.0111, -0.217316],
 #
 # depth_overlay(depth_path, img_left_path, depth_img_path)
 
-img_left_dict = 'datasets/data/cam2_img'
-img_right_dict = 'datasets/data/cam3_img'
+img_left_dict = 'datasets/data_raw/cam2_img'
+img_right_dict = 'datasets/data_raw/cam3_img'
+
+offset_arr = []
 
 for item in os.listdir(img_left_dict):
     item_name = os.path.splitext(item)[0]
@@ -36,4 +40,17 @@ for item in os.listdir(img_left_dict):
     left_img_path = os.path.join(img_left_dict, f"{item_name}.png")
     right_img_path = os.path.join(img_right_dict, f"{item_name}.png")
 
-    report_offset(left_img_path, right_img_path)
+    offset = report_offset(left_img_path, right_img_path)
+    offset_arr.append(offset)
+
+plt.hist(offset_arr, bins=10, edgecolor='black')
+plt.xlabel("offset")
+plt.ylabel("num of samples")
+
+plt.savefig('offset_dist.png', dpi=300, bbox_inches='tight')
+
+with open("offset_stats.txt", "w") as file:
+    file.write(f"average offset: {statistics.mean(offset_arr)}\n")
+    file.write(f"median offset: {statistics.median(offset_arr)}\n")
+    file.write(f"min offset: {min(offset_arr)}\n")
+    file.write(f"max offset: {max(offset_arr)}\n")
