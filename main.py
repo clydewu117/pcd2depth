@@ -83,6 +83,7 @@ for item in os.listdir(pcd_dir):
     cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
     count_arr.append(cur_count)
     depth_arr += cur_depth_arr
+    print(f"Processing {sample_count}")
 
 bins = [0, 100, 200, 300, 400, 500]
 depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
