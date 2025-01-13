@@ -29,7 +29,7 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
         point_px = in_mat @ point_cam  # (3x4) mult (4x1) = (3x1)
 
         w = point_px[2]
-        u, v = int(point_px[0] / w), int(point_px[1] / w)
+        u, v = np.round(point_px[0] / w).astype(int), np.round(point_px[1] / w).astype(int)
 
         if 0 <= v < height and 0 <= u < width:
             mask = np.zeros_like(depth_map, dtype=np.uint8)
@@ -39,10 +39,7 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
             count += 1
 
     depth_map[np.isinf(depth_map)] = 0
-    max_depth = np.max(depth_map)
-    depth_map[np.isinf(depth_map)] = max_depth
-    depth_map_inverted = max_depth - depth_map
-    depth_map_uint16 = (depth_map_inverted * 256).astype(np.uint16)
+    depth_map_uint16 = (depth_map * 256).astype(np.uint16)
 
     with open(out_path, 'wb') as f:
         writer = png.Writer(width=depth_map_uint16.shape[1],
