@@ -68,26 +68,29 @@ count = 0
 # print("Finished processing point cloud")
 
 # get stats from the dataset
-count_arr = []
-depth_arr = []
-sample_count = 0
+# count_arr = []
+# depth_arr = []
+sample_count = 871
 
 print("Starting collecting stats")
 
-for item in os.listdir(pcd_dir):
-    sample_count += 1
-    pcd_path = os.path.join(pcd_dir, item)
-    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam2_in_mat, cam2_ex_mat)
-    count_arr.append(cur_count)
-    depth_arr += cur_depth_arr
-    cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
-    count_arr.append(cur_count)
-    depth_arr += cur_depth_arr
-    print(f"Processing {sample_count}")
+# for item in os.listdir(pcd_dir):
+#     sample_count += 1
+#     pcd_path = os.path.join(pcd_dir, item)
+#     cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam2_in_mat, cam2_ex_mat)
+#     count_arr.append(cur_count)
+#     depth_arr += cur_depth_arr
+#     cur_count, cur_depth_arr = get_stats(pcd_path, width, height, cam3_in_mat, cam3_ex_mat)
+#     count_arr.append(cur_count)
+#     depth_arr += cur_depth_arr
+#     print(f"Processing {sample_count}")
+#
+# np.save('depth_arr.npy', depth_arr)
+# np.save('count_arr.npy', count_arr)
+print("Skipped reading pcd, read saved depth data instead")
 
-np.save('depth_arr.npy', depth_arr)
-np.save('count_arr.npy', count_arr)
-print("Done collecting information and saved, start creating chart")
+count_arr = np.load('count_arr.npy', allow_pickle=True).tolist()
+depth_arr = np.load('depth_arr.npy', allow_pickle=True).tolist()
 
 bins = [0, 100, 200, 300, 400, 500]
 depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
