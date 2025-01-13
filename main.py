@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 # import time
 
 
-cam2_dir = "datasets/data_all/cam2_img"
-cam3_dir = "datasets/data_all/cam3_img"
+cam2_dir = "datasets/data_raw/cam2_img"
+cam3_dir = "datasets/data_raw/cam3_img"
 pcd_dir = "datasets/data_raw/lidar"
 out_depth_cam2 = "datasets/depth_img/cam2_depth"
 out_depth_cam3 = "datasets/depth_img/cam3_depth"
@@ -41,38 +41,38 @@ height = 3648
 count = 0
 
 # read pcd file and generate gray scale depth map
-# print("Start processing point cloud")
-#
-# for item in os.listdir(pcd_dir):
-#     pcd_path = os.path.join(pcd_dir, item)
-#     item_name = os.path.splitext(item)[0]
-#
-#     print(f"Processing {item}")
-#     depth_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
-#     depth_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
-#
-#     pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, depth_path_cam2)
-#     pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, depth_path_cam3)
-#     print(f"Done processing {item}")
-#
-#     print(f"Overlaying depth points from {item}")
-#     image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
-#     image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
-#     depth_img_path_cam2 = os.path.join(out_depth_img_cam2, f"{item_name}_depth_img.png")
-#     depth_img_path_cam3 = os.path.join(out_depth_img_cam3, f"{item_name}_depth_img.png")
-#
-#     depth_overlay(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
-#     depth_overlay(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
-#     print(f"Done overlaying depth points from {item}")
-#
-# print("Finished processing point cloud")
+print("Start processing point cloud")
+
+for item in os.listdir(pcd_dir):
+    pcd_path = os.path.join(pcd_dir, item)
+    item_name = os.path.splitext(item)[0]
+
+    print(f"Processing {item}")
+    depth_path_cam2 = os.path.join(out_depth_cam2, f"{item_name}_depth.png")
+    depth_path_cam3 = os.path.join(out_depth_cam3, f"{item_name}_depth.png")
+
+    pcd2depth(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, depth_path_cam2)
+    pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, depth_path_cam3)
+    print(f"Done processing {item}")
+
+    # print(f"Overlaying depth points from {item}")
+    # image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
+    # image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
+    # depth_img_path_cam2 = os.path.join(out_depth_img_cam2, f"{item_name}_depth_img.png")
+    # depth_img_path_cam3 = os.path.join(out_depth_img_cam3, f"{item_name}_depth_img.png")
+    #
+    # depth_overlay(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
+    # depth_overlay(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
+    # print(f"Done overlaying depth points from {item}")
+
+print("Finished processing point cloud")
 
 # get stats from the dataset
 # count_arr = []
 # depth_arr = []
-sample_count = 0
-
-print("Starting collecting stats")
+# sample_count = 0
+#
+# print("Starting collecting stats")
 
 # for item in os.listdir(pcd_dir):
 #     sample_count += 1
@@ -87,33 +87,33 @@ print("Starting collecting stats")
 #
 # np.save('depth_arr.npy', depth_arr)
 # np.save('count_arr.npy', count_arr)
-print("Skipped reading pcd, read saved depth data instead")
-
-count_arr = np.load('count_arr.npy', allow_pickle=True).tolist()
-depth_arr = np.load('depth_arr.npy', allow_pickle=True).tolist()
-
-bins = [0, 100, 200, 300, 400, 500]
-depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
-avg_depth_count = depth_count / len(count_arr)
-
-plt.bar(bins[:-1], avg_depth_count, width=np.diff(bins), edgecolor='black', align='edge')
-plt.xlabel("depth range")
-plt.ylabel("num of points")
-plt.savefig('depth_dist.png', dpi=300, bbox_inches='tight')
-
-print("Done creating chart, start creating txt")
-
-with open("stats.txt", "w") as file:
-    file.write(f"size of dataset: {sample_count}\n")
-    file.write(f"image size: {width}x{height}\n")
-    file.write(f"average number of points: {statistics.mean(count_arr)}\n")
-    file.write(f"median number of points: {statistics.median(count_arr)}\n")
-    file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
-    file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
-    file.write(f"min depth of points: {min(depth_arr)}\n")
-    file.write(f"max depth of points: {max(depth_arr)}\n")
-
-print("Finished generating stats")
+# print("Skipped reading pcd, read saved depth data instead")
+#
+# count_arr = np.load('count_arr.npy', allow_pickle=True).tolist()
+# depth_arr = np.load('depth_arr.npy', allow_pickle=True).tolist()
+#
+# bins = [0, 100, 200, 300, 400, 500]
+# depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
+# avg_depth_count = depth_count / len(count_arr)
+#
+# plt.bar(bins[:-1], avg_depth_count, width=np.diff(bins), edgecolor='black', align='edge')
+# plt.xlabel("depth range")
+# plt.ylabel("num of points")
+# plt.savefig('depth_dist.png', dpi=300, bbox_inches='tight')
+#
+# print("Done creating chart, start creating txt")
+#
+# with open("stats.txt", "w") as file:
+#     file.write(f"size of dataset: {sample_count}\n")
+#     file.write(f"image size: {width}x{height}\n")
+#     file.write(f"average number of points: {statistics.mean(count_arr)}\n")
+#     file.write(f"median number of points: {statistics.median(count_arr)}\n")
+#     file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
+#     file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
+#     file.write(f"min depth of points: {min(depth_arr)}\n")
+#     file.write(f"max depth of points: {max(depth_arr)}\n")
+#
+# print("Finished generating stats")
 
 # report noise
 # noises = []
