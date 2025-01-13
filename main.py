@@ -94,7 +94,7 @@ depth_arr = np.load('depth_arr.npy', allow_pickle=True).tolist()
 
 bins = [0, 100, 200, 300, 400, 500]
 depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
-avg_depth_count = depth_count / len(depth_arr)
+avg_depth_count = depth_count / len(count_arr)
 
 plt.bar(bins[:-1], avg_depth_count, width=np.diff(bins), edgecolor='black', align='edge')
 plt.xlabel("depth range")
