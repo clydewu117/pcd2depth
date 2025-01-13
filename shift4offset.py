@@ -34,14 +34,16 @@ img_right_dict = 'datasets/data_raw/cam3_img'
 
 offset_arr = []
 
-for item in os.listdir(img_left_dict):
-    item_name = os.path.splitext(item)[0]
+with open("offset_log.txt", "w") as file:
+    for item in os.listdir(img_left_dict):
+        item_name = os.path.splitext(item)[0]
 
-    left_img_path = os.path.join(img_left_dict, f"{item_name}.png")
-    right_img_path = os.path.join(img_right_dict, f"{item_name}.png")
+        left_img_path = os.path.join(img_left_dict, f"{item_name}.png")
+        right_img_path = os.path.join(img_right_dict, f"{item_name}.png")
 
-    offset = report_offset(left_img_path, right_img_path)
-    offset_arr.append(offset)
+        report, offset = report_offset(left_img_path, right_img_path, item_name)
+        file.write(f"{report}\n")
+        offset_arr.append(offset)
 
 plt.hist(offset_arr, bins=10, edgecolor='black')
 plt.xlabel("offset")
@@ -50,7 +52,7 @@ plt.ylabel("num of samples")
 plt.savefig('offset_dist.png', dpi=300, bbox_inches='tight')
 
 with open("offset_stats.txt", "w") as file:
-    file.write(f"average offset: {statistics.mean(offset_arr)}\n")
-    file.write(f"median offset: {statistics.median(offset_arr)}\n")
-    file.write(f"min offset: {min(offset_arr)}\n")
-    file.write(f"max offset: {max(offset_arr)}\n")
+    file.write(f"average offset: {statistics.mean(offset_arr)} pixels\n")
+    file.write(f"median offset: {statistics.median(offset_arr)} pixels\n")
+    file.write(f"min offset: {min(offset_arr)} pixels\n")
+    file.write(f"max offset: {max(offset_arr)} pixels\n")

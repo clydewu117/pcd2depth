@@ -167,7 +167,7 @@ def eliminate_offset(img1_path, img2_path, save_path):
     cv2.imwrite(save_path_img2, cropped_img2)
 
 
-def report_offset(img1_path, img2_path):
+def report_offset(img1_path, img2_path, name):
     img1 = cv2.imread(img1_path)
     img2 = cv2.imread(img2_path)
 
@@ -179,6 +179,7 @@ def report_offset(img1_path, img2_path):
     _, _, _, max_loc = cv2.minMaxLoc(result)
 
     _, match_top = max_loc
-    print(match_top)
+    report = f"{match_top} pixels for {name}"
+    print(report)
 
-    return match_top
+    return report, match_top
