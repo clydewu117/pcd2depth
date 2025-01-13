@@ -39,6 +39,9 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
             count += 1
 
     depth_map[np.isinf(depth_map)] = 0
+    max_depth = np.max(depth_map)
+    non_zero_mask = depth_map > 0
+    depth_map[non_zero_mask] = max_depth - depth_map[non_zero_mask]
     depth_map_uint16 = (depth_map * 256).astype(np.uint16)
 
     with open(out_path, 'wb') as f:
