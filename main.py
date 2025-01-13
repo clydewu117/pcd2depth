@@ -85,6 +85,10 @@ for item in os.listdir(pcd_dir):
     depth_arr += cur_depth_arr
     print(f"Processing {sample_count}")
 
+np.save('depth_arr.npy', depth_arr)
+np.save('count_arr.npy', count_arr)
+print("Done collecting information and saved, start creating chart")
+
 bins = [0, 100, 200, 300, 400, 500]
 depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
 avg_depth_count = depth_count / sample_count
@@ -93,6 +97,8 @@ plt.bar(bins[:-1], avg_depth_count, width=np.diff(bins), edgecolor='black', alig
 plt.xlabel("depth range")
 plt.ylabel("num of points")
 plt.savefig('depth_dist.png', dpi=300, bbox_inches='tight')
+
+print("Done creating chart, start creating txt")
 
 with open("stats.txt", "w") as file:
     file.write(f"size of dataset: {sample_count}\n")
@@ -104,7 +110,7 @@ with open("stats.txt", "w") as file:
     file.write(f"min depth of points: {min(depth_arr)}\n")
     file.write(f"max depth of points: {max(depth_arr)}\n")
 
-print("Finished collecting stats")
+print("Finished generating stats")
 
 # report noise
 # noises = []
