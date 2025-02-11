@@ -186,3 +186,37 @@ def report_offset(img1_path, img2_path, name):
     print(report)
 
     return report, match_top
+
+
+def report_misalignment(img_path, depth_path):
+    img = cv2.imread(img_path)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    depth = cv2.imread(depth_path)
+
+    edges_img = cv2.Canny(img_gray, 100, 120)
+    edges_depth = cv2.Canny(depth, 100, 200)
+
+    intersection = np.logical_and(edges_img, edges_depth).sum()
+    union = np.logical_or(edges_img, edges_depth).sum()
+    iou = intersection / union
+
+    print(iou)
+
+
+def report_error(img1_path, img2_path, save_dir):
+    img1 = cv2.imread(img1_path)
+    img2 = cv2.imread(img2_path)
+
+    pre_error_map_path = os.path.join(save_dir, "pre_error_map.png")
+    post_error_map_path = os.path.join(save_dir, "post_error_map.png")
+
+    height, width, _ = img1.shape
+
+    target_block_height = 1000
+    target_block = img1[:target_block_height, :]
+
+    result = cv2.matchTemplate(img2, target_block, cv2.TM_CCOEFF_NORMED)
+    _, _, _, max_loc = cv2.minMaxLoc(result)  # the top left corner of best matched area from right image
+    _, y_best_match = max_loc  # the y coordinate of top left corner best match
+
+    vertical_offset = y_best_match

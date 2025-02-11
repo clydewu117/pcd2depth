@@ -1,17 +1,22 @@
 import os
 import shutil
 
-datasets_dir = "datasets"
+datasets_dir = "datasets/data/test_2_9"
 
 src_dirs = []
 for item in os.listdir(datasets_dir):
-    if os.path.isdir(os.path.join(datasets_dir, item)) and item.startswith("data_") and item != "data_all":
+    if os.path.isdir(os.path.join(datasets_dir, item)) and item != "in" and item != "out":
         src_dirs.append(os.path.join(datasets_dir, item))
 
-des_dir = "datasets/data_all"
+des_dir = "datasets/data/test_2_9/in"
 des_cam2_dir = os.path.join(des_dir, "cam2_img")
 des_cam3_dir = os.path.join(des_dir, "cam3_img")
 des_lidar_dir = os.path.join(des_dir, "lidar")
+
+os.makedirs(des_dir, exist_ok=True)
+os.makedirs(des_cam2_dir, exist_ok=True)
+os.makedirs(des_cam3_dir, exist_ok=True)
+os.makedirs(des_lidar_dir, exist_ok=True)
 
 log_file_path = os.path.join(des_dir, "correspondence_log.txt")
 

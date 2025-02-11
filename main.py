@@ -5,15 +5,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 # import time
 
+# input directory
+in_dir = "datasets/data/test_2_9/in"
 
-cam2_dir = "datasets/data_raw/cam2_img"
-cam3_dir = "datasets/data_raw/cam3_img"
-pcd_dir = "datasets/data_raw/lidar"
-out_depth_cam2 = "datasets/depth_img/cam2_depth"
-out_depth_cam3 = "datasets/depth_img/cam3_depth"
-out_depth_img_cam2 = "datasets/depth_img/cam2_depth_img"
-out_depth_img_cam3 = "datasets/depth_img/cam3_depth_img"
+cam2_dir = os.path.join(in_dir, "cam2_img")
+cam3_dir = os.path.join(in_dir, "cam3_img")
+pcd_dir = os.path.join(in_dir, "lidar")
 
+# output directory
+out_dir = "datasets/data/test_2_9/out"
+
+out_depth_cam2 = os.path.join(out_dir, "cam2_depth")
+out_depth_cam3 = os.path.join(out_dir, "cam3_depth")
+out_depth_img_cam2 = os.path.join(out_dir, "cam2_depth_img")
+out_depth_img_cam3 = os.path.join(out_dir, "cam3_depth_img")
+
+os.makedirs(out_depth_cam2, exist_ok=True)
+os.makedirs(out_depth_cam3, exist_ok=True)
+os.makedirs(out_depth_img_cam2, exist_ok=True)
+os.makedirs(out_depth_img_cam3, exist_ok=True)
+
+# calibration matrices
 cam2_in_mat = [[31470.1, 0, 2736, 0],
                [0, 30825, 1824, 0],
                [0, 0, 1.0, 0]]
@@ -35,6 +47,7 @@ cam3_ex_mat = [[0.999799, -0.00445795, 0.0110814, 0.233303],
 matrices_cam2 = [cam2_ex_mat, cam2_in_mat]
 matrices_cam3 = [cam3_ex_mat, cam3_in_mat]
 
+# input images size
 width = 5472
 height = 3648
 
@@ -55,24 +68,27 @@ for item in os.listdir(pcd_dir):
     pcd2depth(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, depth_path_cam3)
     print(f"Done processing {item}")
 
-    # print(f"Overlaying depth points from {item}")
-    # image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
-    # image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
-    # depth_img_path_cam2 = os.path.join(out_depth_img_cam2, f"{item_name}_depth_img.png")
-    # depth_img_path_cam3 = os.path.join(out_depth_img_cam3, f"{item_name}_depth_img.png")
-    #
-    # depth_overlay(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
-    # depth_overlay(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
-    # print(f"Done overlaying depth points from {item}")
+    print(f"Overlaying depth points from {item}")
+    image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
+    image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
+    depth_img_path_cam2 = os.path.join(out_depth_img_cam2, f"{item_name}_depth_img.png")
+    depth_img_path_cam3 = os.path.join(out_depth_img_cam3, f"{item_name}_depth_img.png")
+
+    depth_overlay(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
+    depth_overlay(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
+    print(f"Done overlaying depth points from {item}")
 
 print("Finished processing point cloud")
 
 # get stats from the dataset
-# count_arr = []
 # depth_arr = []
-# sample_count = 0
-#
-# print("Starting collecting stats")
+# count_arr = []
+sample_count = 0
+
+depth_arr_path = os.path.join(out_dir, "depth_arr.npy")
+count_arr_path = os.path.join(out_dir, "count_arr.npy")
+
+print("Start collecting stats")
 
 # for item in os.listdir(pcd_dir):
 #     sample_count += 1
@@ -85,35 +101,40 @@ print("Finished processing point cloud")
 #     depth_arr += cur_depth_arr
 #     print(f"Processing {sample_count}")
 #
-# np.save('depth_arr.npy', depth_arr)
-# np.save('count_arr.npy', count_arr)
-# print("Skipped reading pcd, read saved depth data instead")
-#
-# count_arr = np.load('count_arr.npy', allow_pickle=True).tolist()
-# depth_arr = np.load('depth_arr.npy', allow_pickle=True).tolist()
-#
-# bins = [0, 100, 200, 300, 400, 500]
-# depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
-# avg_depth_count = depth_count / len(count_arr)
-#
-# plt.bar(bins[:-1], avg_depth_count, width=np.diff(bins), edgecolor='black', align='edge')
-# plt.xlabel("depth range")
-# plt.ylabel("num of points")
-# plt.savefig('depth_dist.png', dpi=300, bbox_inches='tight')
-#
-# print("Done creating chart, start creating txt")
-#
-# with open("stats.txt", "w") as file:
-#     file.write(f"size of dataset: {sample_count}\n")
-#     file.write(f"image size: {width}x{height}\n")
-#     file.write(f"average number of points: {statistics.mean(count_arr)}\n")
-#     file.write(f"median number of points: {statistics.median(count_arr)}\n")
-#     file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
-#     file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
-#     file.write(f"min depth of points: {min(depth_arr)}\n")
-#     file.write(f"max depth of points: {max(depth_arr)}\n")
-#
-# print("Finished generating stats")
+# np.save(depth_arr_path, depth_arr)
+# np.save(count_arr_path, count_arr)
+# print("Finished reading pcd, depth data saved")
+
+print("Skipped reading pcd, read saved depth data instead")
+
+depth_dist_path = os.path.join(out_dir, "depth_dist.png")
+depth_stats_path = os.path.join(out_dir, "stats.txt")
+
+depth_arr = np.load(depth_arr_path, allow_pickle=True).tolist()
+count_arr = np.load(count_arr_path, allow_pickle=True).tolist()
+
+bins = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+depth_count, bin_edges = np.histogram(depth_arr, bins=bins)
+avg_depth_count = depth_count / len(count_arr)
+
+plt.bar(bins[:-1], avg_depth_count, width=np.diff(bins), edgecolor='black', align='edge')
+plt.xlabel("depth range")
+plt.ylabel("num of points")
+plt.savefig(depth_dist_path, dpi=300, bbox_inches='tight')
+
+print("Done creating chart, start creating stats")
+
+with open(depth_stats_path, "w") as file:
+    file.write(f"size of dataset: {sample_count}\n")
+    file.write(f"image size: {width}x{height}\n")
+    file.write(f"average number of points: {statistics.mean(count_arr)}\n")
+    file.write(f"median number of points: {statistics.median(count_arr)}\n")
+    file.write(f"average depth of points: {statistics.mean(depth_arr)}\n")
+    file.write(f"median depth of points: {statistics.median(depth_arr)}\n")
+    file.write(f"min depth of points: {min(depth_arr)}\n")
+    file.write(f"max depth of points: {max(depth_arr)}\n")
+
+print("Finished generating stats")
 
 # report noise
 # noises = []

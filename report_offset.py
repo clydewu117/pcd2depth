@@ -4,13 +4,6 @@ import matplotlib.pyplot as plt
 
 from utils import eliminate_offset, pcd2depth, depth_overlay, report_offset
 
-img_path_1 = 'datasets/data/cam2_img/0.png'
-img_path_2 = 'datasets/data/cam3_img/0.png'
-pcd_path = 'datasets/data/lidar/0.pcd'
-save_path = 'datasets/data/test'
-depth_path = 'datasets/data/test_depth/0_depth.pcd'
-img_left_path = 'datasets/data/test/cropped_image_left.png'
-depth_img_path = 'datasets/data/test_depth_img/0_depth_img.png'
 
 width = 5472
 height = 3461
@@ -29,17 +22,23 @@ ex_mat = [[0.999933899272713, -0.003245217941172, 0.0111, -0.217316],
 #
 # depth_overlay(depth_path, img_left_path, depth_img_path)
 
-img_left_dict = 'datasets/data_raw/cam2_img'
-img_right_dict = 'datasets/data_raw/cam3_img'
+data_dir = "datasets/data/test_2_9/in"
+
+img_left_dir = os.path.join(data_dir, "cam2_img")
+img_right_dir = os.path.join(data_dir, "cam3_img")
+
+log_path = os.path.join(data_dir, "offset_log.txt")
+dist_path = os.path.join(data_dir, "offset_dist.png")
+stats_path = os.path.join(data_dir, "offset_stats.txt")
 
 offset_arr = []
 
-with open("offset_log.txt", "w") as file:
-    for item in os.listdir(img_left_dict):
+with open(log_path, "w") as file:
+    for item in os.listdir(img_left_dir):
         item_name = os.path.splitext(item)[0]
 
-        left_img_path = os.path.join(img_left_dict, f"{item_name}.png")
-        right_img_path = os.path.join(img_right_dict, f"{item_name}.png")
+        left_img_path = os.path.join(img_left_dir, f"{item_name}.png")
+        right_img_path = os.path.join(img_right_dir, f"{item_name}.png")
 
         report, offset = report_offset(left_img_path, right_img_path, item_name)
         file.write(f"{report}\n")
@@ -49,9 +48,9 @@ plt.hist(offset_arr, bins=10, edgecolor='black')
 plt.xlabel("offset")
 plt.ylabel("num of samples")
 
-plt.savefig('offset_dist.png', dpi=300, bbox_inches='tight')
+plt.savefig(dist_path, dpi=300, bbox_inches='tight')
 
-with open("offset_stats.txt", "w") as file:
+with open(stats_path, "w") as file:
     file.write(f"average offset: {statistics.mean(offset_arr)} pixels\n")
     file.write(f"median offset: {statistics.median(offset_arr)} pixels\n")
     file.write(f"min offset: {min(offset_arr)} pixels\n")
