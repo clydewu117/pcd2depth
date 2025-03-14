@@ -4,6 +4,8 @@ import open3d as o3d
 import numpy as np
 import cv2
 import png
+import statistics
+import tqdm
 # import math
 # from collections import Counter
 # from PIL import Image
@@ -55,6 +57,57 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
     print(f"Depth map saved to {out_path}")
 
 
+def pcd2depth1(pcd_path, width, height, in_mat, ex_mat, out_path):
+    pcd = o3d.io.read_point_cloud(pcd_path)
+    points = np.asarray(pcd.points)  # (N, 3)
+
+    in_mat = np.array(in_mat)
+    ex_mat = np.array(ex_mat)
+
+    # Convert to homogeneous coordinates (N, 4)
+    points_h = np.hstack((points, np.ones((points.shape[0], 1))))
+
+    points_cam = ex_mat @ points_h.T
+    points_cam = points_cam.T
+
+    # Camera to pixel transformation (3, 4) x (4, N) → (3, N)
+    points_px = in_mat @ points_cam.T
+    points_px = points_px.T
+
+    # Normalize to get pixel coordinates
+    w = points_px[:, 2]
+    u = np.round(points_px[:, 0] / w).astype(int)
+    v = np.round(points_px[:, 1] / w).astype(int)
+
+    # Filter valid pixel coordinates
+    valid_mask = (0 <= u) & (u < width) & (0 <= v) & (v < height) & (w < 500)
+    u, v, w = u[valid_mask], v[valid_mask], w[valid_mask]
+
+    # Normalize depth values for better visualization
+    # max_depth = np.max(w)
+    depth_norm = 500
+    w_uint16 = (w / depth_norm * 65535).astype(np.uint16)
+
+    depth_map = np.full((height, width), 65535, dtype=np.uint16)
+
+    for i in range(len(u)):
+        cv2.circle(depth_map, (u[i], v[i]), 5, int(w_uint16[i]), thickness=-1)
+        depth_map[v[i], u[i]] = np.minimum(w_uint16[i], depth_map[v[i], u[i]])
+
+    depth_map[depth_map == 65535] = 0
+    # max_depth = np.max(depth_map)
+    max_depth = 500
+    non_zero_mask = depth_map > 0
+    depth_map[non_zero_mask] = max_depth - depth_map[non_zero_mask]
+
+    with open(out_path, 'wb') as f:
+        writer = png.Writer(width=depth_map.shape[1],
+                            height=depth_map.shape[0],
+                            bitdepth=16,
+                            greyscale=True)
+        writer.write(f, depth_map.tolist())
+
+
 def depth_overlay(depth_path, img_path, out_path):
     orig_image = cv2.imread(img_path)
     depth_image = cv2.imread(depth_path)
@@ -66,8 +119,6 @@ def depth_overlay(depth_path, img_path, out_path):
     overlaid_image = cv2.addWeighted(orig_image, 1-alpha, depth_colored, alpha, 0)
 
     cv2.imwrite(out_path, overlaid_image)
-
-    print(f"Image with depth saved to {out_path}")
 
 
 def get_stats(pcd_path, width, height, in_mat, ex_mat):
@@ -95,62 +146,41 @@ def get_stats(pcd_path, width, height, in_mat, ex_mat):
     return count, depth_arr
 
 
-# def report_noise(pcd_path, left_img_path, right_img_path, width, height, matrices_cam2, matrices_cam3):
-#     pcd = o3d.io.read_point_cloud(pcd_path)
-#     points = np.asarray(pcd.points)
-#
-#     left_img = Image.open(left_img_path)
-#     right_img = Image.open(right_img_path)
-#
-#     rgb_diffs = []
-#     count = 0
-#
-#     for point in points:
-#         x, y, z = point
-#         point_3d = np.array([x, y, z, 1])
-#
-#         # world to camera2
-#         point_cam2 = matrices_cam2[0] @ point_3d  # (4x4) mult (4x1) = (4x1)
-#         # camera to pixel2
-#         point_px2 = matrices_cam2[1] @ point_cam2  # (3x4) mult (4x1) = (3x1)
-#
-#         # world to camera3
-#         point_cam3 = matrices_cam3[0] @ point_3d  # (4x4) mult (4x1) = (4x1)
-#         # camera to pixel3
-#         point_px3 = matrices_cam3[1] @ point_cam3  # (3x4) mult (4x1) = (3x1)
-#
-#         w2 = point_px2[2]
-#         u2, v2 = int(point_px2[0] / w2), int(point_px2[1] / w2)
-#
-#         w3 = point_px3[2]
-#         u3, v3 = int(point_px3[0] / w3), int(point_px3[1] / w3)
-#
-#         if 0 <= v2 < height and 0 <= u2 < width and 0 <= v3 < height and 0 <= u3 < width:
-#             loc_left = (u2, v2)
-#             loc_right = (u3, v3)
-#             rgb_diff = compare_rgb(loc_left, loc_right, left_img, right_img)
-#             print(f"rgb diff: {rgb_diff}")
-#             rgb_diffs.append(rgb_diff)
-#
-#         count += 1
-#         # print(f"processing {count}/{len(points)}")
-#
-#     return rgb_diffs
-#
-#
-# def compare_rgb(loc_left, loc_right, left_img, right_img):
-#
-#     r_left, g_left, b_left = left_img.getpixel(loc_left)
-#     r_right, g_right, b_right = right_img.getpixel(loc_right)
-#
-#     return ((r_left-r_right)**2+(g_left-g_right)**2+(b_left-b_right)**2) / 3
+def get_stats1(pcd_path, width, height, in_mat, ex_mat):
+    pcd = o3d.io.read_point_cloud(pcd_path)
+    points = np.asarray(pcd.points)
+    count = 0
+    depth_arr = []
 
-def eliminate_offset(img1_path, img2_path, save_path):
+    # Convert to homogeneous coordinates (N, 4)
+    points_h = np.hstack((points, np.ones((points.shape[0], 1))))
+
+    points_cam = ex_mat @ points_h.T
+    points_cam = points_cam.T
+
+    # Camera to pixel transformation (3, 4) x (4, N) → (3, N)
+    points_px = in_mat @ points_cam.T
+    points_px = points_px.T
+
+    # Normalize to get pixel coordinates
+    w = points_px[:, 2]
+    u = np.round(points_px[:, 0] / w).astype(int)
+    v = np.round(points_px[:, 1] / w).astype(int)
+
+    for i in range(len(u)):
+        if (0 <= u[i]) & (u[i] < width) & (0 <= v[i]) & (v[i] < height):
+            count += 1
+            depth_arr.append(w[i])
+
+    return count, depth_arr
+
+
+def eliminate_offset(img1_path, img2_path, save_path_img1, save_path_img2):
     img1 = cv2.imread(img1_path)
     img2 = cv2.imread(img2_path)
 
     height, width, _ = img1.shape
-    block_h = 1000
+    block_h = 3000
     
     cropped = img1[:block_h, :]
     result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
@@ -164,18 +194,17 @@ def eliminate_offset(img1_path, img2_path, save_path):
     cropped_img1 = img1[:crop_h, :]
     cropped_img2 = img2[match_top:, :]
 
-    save_path_img1 = os.path.join(save_path, 'cropped_image_left.png')
-    save_path_img2 = os.path.join(save_path, 'cropped_image_right.png')
     cv2.imwrite(save_path_img1, cropped_img1)
     cv2.imwrite(save_path_img2, cropped_img2)
 
+    return match_top
 
-def report_offset(img1_path, img2_path, name):
+
+def report_offset(img1_path, img2_path, name, block_h):
     img1 = cv2.imread(img1_path)
     img2 = cv2.imread(img2_path)
 
     height, width, _ = img1.shape
-    block_h = 1000
 
     cropped = img1[:block_h, :]
     result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
@@ -186,6 +215,29 @@ def report_offset(img1_path, img2_path, name):
     print(report)
 
     return report, match_top
+
+
+def report_avg_offset(img1_path, img2_path, name, block_h=3000, step=100):
+    img1 = cv2.imread(img1_path)
+    img2 = cv2.imread(img2_path)
+
+    offset_arr = []
+
+    height, width, _ = img1.shape
+    y = 0
+    while y + block_h < height - step:
+        cropped = img1[y:min(y+block_h, height), :]
+        result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
+        _, _, _, max_loc = cv2.minMaxLoc(result)
+        _, match_top = max_loc
+        offset_arr.append(abs(y - match_top))
+        print(y, abs(y - match_top))
+        y += step
+
+    avg_offset = statistics.mean(offset_arr)
+    report = f"{avg_offset} pixels for {name}"
+    print(report)
+    return report, avg_offset
 
 
 def report_misalignment(img_path, depth_path):
@@ -203,12 +255,9 @@ def report_misalignment(img_path, depth_path):
     print(iou)
 
 
-def report_error(img1_path, img2_path, save_dir):
+def report_error(img1_path, img2_path):
     img1 = cv2.imread(img1_path)
     img2 = cv2.imread(img2_path)
-
-    pre_error_map_path = os.path.join(save_dir, "pre_error_map.png")
-    post_error_map_path = os.path.join(save_dir, "post_error_map.png")
 
     height, width, _ = img1.shape
 
@@ -220,3 +269,98 @@ def report_error(img1_path, img2_path, save_dir):
     _, y_best_match = max_loc  # the y coordinate of top left corner best match
 
     vertical_offset = y_best_match
+
+    return vertical_offset
+
+
+def find_best_match_px(target_px, px_list):
+    target_px = np.array(target_px)
+    px_list = np.array(px_list)
+
+    diff = np.linalg.norm(px_list - target_px, axis=1)
+    best_match_index = np.argmin(diff)
+
+    return best_match_index
+
+
+def gen_cross_map(img1_path, img2_path, out_path):
+    img1 = cv2.imread(img1_path, cv2.IMREAD_COLOR)
+    img2 = cv2.imread(img2_path, cv2.IMREAD_COLOR)
+
+    cross_map = cv2.subtract(img1, img2)
+
+    cv2.imwrite(out_path, cross_map)
+
+
+# def find_min_disp(pcd_path, ex_mat1, in_mat1, ex_mat2, in_mat2, height, width):
+#     pcd = o3d.io.read_point_cloud(pcd_path)
+#     points = np.asarray(pcd.points)
+#
+#     disp_arr = []
+#     w1_arr = []
+#     w2_arr = []
+#
+#     for point in points:
+#         x, y, z = point
+#         point_3d = np.array([x, y, z, 1])
+#
+#         point_cam1 = ex_mat1 @ point_3d  # (4x4) mult (4x1) = (4x1)
+#         point_px1 = in_mat1 @ point_cam1  # (3x4) mult (4x1) = (3x1)
+#         w1 = point_px1[2]
+#         u1, v1 = np.round(point_px1[0] / w1).astype(int), np.round(point_px1[1] / w1).astype(int)
+#
+#         point_cam2 = ex_mat2 @ point_3d  # (4x4) mult (4x1) = (4x1)
+#         point_px2 = in_mat2 @ point_cam2  # (3x4) mult (4x1) = (3x1)
+#         w2 = point_px2[2]
+#         u2, v2 = np.round(point_px2[0] / w2).astype(int), np.round(point_px2[1] / w2).astype(int)
+#
+#         if v1 < height and v2 < height and u1 < width and u2 < width:
+#             disp_arr.append(np.linalg.norm(np.array([u1, v1]) - np.array([u2, v2])))
+#             w1_arr.append(w1)
+#             w2_arr.append(w2)
+#
+#     min_disp = min(disp_arr)
+#     i = disp_arr.index(min_disp)
+#     w1_depth = w1_arr[i]
+#     w2_depth = w2_arr[i]
+#
+#     return min_disp, w1_depth, w2_depth
+
+
+def find_min_disp(pcd_path, ex_mat1, in_mat1, ex_mat2, in_mat2, height, width):
+    pcd = o3d.io.read_point_cloud(pcd_path)
+    points = np.asarray(pcd.points)  # Shape: (N, 3)
+
+    # Convert points to homogeneous coordinates (N, 4)
+    points_h = np.hstack((points, np.ones((points.shape[0], 1))))  # (N, 4)
+
+    # Project points to first camera
+    cam1_points = (ex_mat1 @ points_h.T).T  # (N, 4)
+    px1 = (in_mat1 @ cam1_points.T).T  # (N, 3)
+    w1 = px1[:, 2]
+    u1 = np.round(px1[:, 0] / w1).astype(int)
+    v1 = np.round(px1[:, 1] / w1).astype(int)
+
+    # Project points to second camera
+    cam2_points = (ex_mat2 @ points_h.T).T  # (N, 4)
+    px2 = (in_mat2 @ cam2_points.T).T  # (N, 3)
+    w2 = px2[:, 2]
+    u2 = np.round(px2[:, 0] / w2).astype(int)
+    v2 = np.round(px2[:, 1] / w2).astype(int)
+
+    # Filter points inside image bounds
+    valid_mask = (v1 < height) & (v2 < height) & (u1 < width) & (u2 < width)
+
+    # Compute disparity only for valid points
+    disp_arr = np.linalg.norm(np.vstack((u1, v1)).T - np.vstack((u2, v2)).T, axis=1)
+    disp_arr = disp_arr[valid_mask]
+    w1_valid = w1[valid_mask]
+    w2_valid = w2[valid_mask]
+
+    # Get minimum disparity and corresponding depths
+    min_idx = np.argmin(disp_arr)
+    min_disp = disp_arr[min_idx]
+    w1_depth = w1_valid[min_idx]
+    w2_depth = w2_valid[min_idx]
+
+    return min_disp, w1_depth, w2_depth

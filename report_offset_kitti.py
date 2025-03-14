@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from utils import eliminate_offset, pcd2depth, depth_overlay, report_avg_offset
+from utils import report_avg_offset
 
 data_dir = "datasets/KITTI/training"
 
@@ -18,12 +18,11 @@ avg_offset_path = os.path.join(data_dir, "avg_offset_arr_100.npy")
 avg_offset_arr = []
 
 for item in tqdm(os.listdir(img_left_dir)):
-    item_name = os.path.splitext(item)[0]
 
-    left_img_path = os.path.join(img_left_dir, f"{item_name}.png")
-    right_img_path = os.path.join(img_right_dir, f"{item_name}.png")
+    left_img_path = os.path.join(img_left_dir, item)
+    right_img_path = os.path.join(img_right_dir, item)
 
-    report_avg, avg_offset = report_avg_offset(left_img_path, right_img_path, item_name, block_h=3000, step=100)
+    report_avg, avg_offset = report_avg_offset(left_img_path, right_img_path, item, block_h=200, step=25)
     avg_offset_arr.append(avg_offset)
 
 np.save(avg_offset_path, avg_offset_arr)
