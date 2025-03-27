@@ -7,14 +7,14 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 # input directory
-in_dir = "datasets/data/test_2_14/in"
+in_dir = "datasets/data/test_2_9/in"
 
 cam2_dir = os.path.join(in_dir, "cam2_img")
 cam3_dir = os.path.join(in_dir, "cam3_img")
 pcd_dir = os.path.join(in_dir, "lidar")
 
 # output directory
-out_dir = "datasets/data/test_2_14/out"
+out_dir = "datasets/data/test_2_9/out"
 
 out_depth_cam2 = os.path.join(out_dir, "cam2_depth")
 out_depth_cam3 = os.path.join(out_dir, "cam3_depth")
@@ -92,14 +92,14 @@ for item in tqdm(os.listdir(pcd_dir)):
     pcd2depth1(pcd_path, width, height, cam2_in_mat, cam2_ex_mat, depth_path_cam2)
     pcd2depth1(pcd_path, width, height, cam3_in_mat, cam3_ex_mat, depth_path_cam3)
 
-    image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
-    image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
-
-    depth_img_path_cam2 = os.path.join(out_depth_img_cam2, f"{item_name}_depth_img.png")
-    depth_img_path_cam3 = os.path.join(out_depth_img_cam3, f"{item_name}_depth_img.png")
-
-    depth_overlay1(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
-    depth_overlay1(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
+    # image_path_cam2 = os.path.join(cam2_dir, f"{item_name}.png")
+    # image_path_cam3 = os.path.join(cam3_dir, f"{item_name}.png")
+    #
+    # depth_img_path_cam2 = os.path.join(out_depth_img_cam2, f"{item_name}_depth_img.png")
+    # depth_img_path_cam3 = os.path.join(out_depth_img_cam3, f"{item_name}_depth_img.png")
+    #
+    # depth_overlay1(depth_path_cam2, image_path_cam2, depth_img_path_cam2)
+    # depth_overlay1(depth_path_cam3, image_path_cam3, depth_img_path_cam3)
 
 print("Finished processing point cloud")
 exit()
