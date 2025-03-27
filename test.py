@@ -2,20 +2,20 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+import json
 
-cam2_sc_path = "datasets/data/test_2_14/in/cam2_sc_log.txt"
-cam3_sc_path = "datasets/data/test_2_14/in/cam3_sc_log.txt"
+with open("segment_results.json", "r") as f:
+    loaded_dict = json.load(f)
 
-# Read the log file
-with open(cam3_sc_path, "r") as f:
-    lines = f.readlines()
+lengths = [len(v) for k, v in loaded_dict.items()]
 
-# Extract the numerical part and sort
-sorted_lines = sorted(lines, key=lambda x: int(re.search(r"score for (\d+)\.png", x).group(1)))
+max_len = max(lengths)
+min_len = min(lengths)
 
-# Write the sorted lines back
-with open("datasets/data/test_2_14/in/cam3_sc_log1.txt", "w") as f:
-    f.writelines(sorted_lines)
-
-# Print the sorted output
-print("".join(sorted_lines))
+plt.hist(lengths, bins=range(min_len, max_len), edgecolor='black')
+plt.title("segments / frames", fontsize=16)
+plt.xlabel("number of segments", fontsize=16)
+plt.ylabel("number of frames", fontsize=16)
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16)
+plt.show()

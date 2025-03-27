@@ -1,15 +1,16 @@
 from utils import eliminate_offset
 import os
 import cv2
+from tqdm import tqdm
 
-img_left_dir = "datasets/data/test_2_14/cross_test/cross_in/img1"
-img_right_dir = "datasets/data/test_2_14/cross_test/cross_in/img2"
+img_left_dir = "datasets/data/test_2_14/in/cam2_img"
+img_right_dir = "datasets/data/test_2_14/in/cam3_img"
 
-rec_left_dir = "datasets/data/test_2_14/cross_test/cross_uni/img1"
-rec_right_dir = "datasets/data/test_2_14/cross_test/cross_uni/img2"
+rec_left_dir = "datasets/data/test_2_14/in_rec/cam2_img"
+rec_right_dir = "datasets/data/test_2_14/in_rec/cam3_img"
 
-uni_rec_left_dir = "datasets/data/test_2_14/cross_test/cross_uni_rec/img1"
-uni_rec_right_dir = "datasets/data/test_2_14/cross_test/cross_uni_rec/img2"
+uni_rec_left_dir = "datasets/data/test_2_14/in_uni_rec/cam2_img"
+uni_rec_right_dir = "datasets/data/test_2_14/in_uni_rec/cam3_img"
 
 os.makedirs(rec_left_dir, exist_ok=True)
 os.makedirs(rec_right_dir, exist_ok=True)
@@ -18,7 +19,7 @@ os.makedirs(uni_rec_right_dir, exist_ok=True)
 
 height_arr = []
 
-for item in os.listdir(img_left_dir):
+for item in tqdm(os.listdir(img_left_dir)):
     item_name = os.path.splitext(item)[0]
 
     img_left_path = os.path.join(img_left_dir, f"{item_name}.png")
@@ -33,7 +34,7 @@ for item in os.listdir(img_left_dir):
 
 target_h = min(height_arr)
 
-for item in os.listdir(rec_left_dir):
+for item in tqdm(os.listdir(rec_left_dir)):
     item_name = os.path.splitext(item)[0]
 
     rec_left_path = os.path.join(rec_left_dir, f"{item_name}.png")

@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from tqdm import tqdm
 import os
+import json
 
 
 def fft_process(image, draw=False):
@@ -30,29 +31,27 @@ data_dir = "datasets/data/test_2_14/in"
 cam2_dir = "datasets/data/test_2_14/in/cam2_img"
 cam3_dir = "datasets/data/test_2_14/in/cam3_img"
 
-cam2_sc_arr = []
-cam3_sc_arr = []
-cam2_arr_path = os.path.join(data_dir, "cam2_sc_arr.npy")
-cam3_arr_path = os.path.join(data_dir, "cam3_sc_arr.npy")
+cam2_sc_dict = {}
+cam3_sc_dict = {}
+cam2_dict_path = os.path.join(data_dir, "cam2_sharpness.json")
+cam3_dict_path = os.path.join(data_dir, "cam3_sharpness.json")
 
-cam2_sc_log = os.path.join(data_dir, "cam2_sc_log.txt")
-cam3_sc_log = os.path.join(data_dir, "cam3_sc_log.txt")
+for item in tqdm(os.listdir(cam2_dir)):
+    img_path = os.path.join(cam2_dir, item)
+    img = cv2.imread(img_path)[:, :, ::-1]
+    score = sharpness_score(fft_process(img))
+    cam2_sc_dict[item] = score
 
-with open(cam2_sc_log, "w") as f:
-    for item in tqdm(os.listdir(cam2_dir)):
-        img_path = os.path.join(cam2_dir, item)
-        img = cv2.imread(img_path)[:, :, ::-1]
-        score = sharpness_score(fft_process(img))
-        cam2_sc_arr.append(score)
-        f.write(f"score for {item} = {score}\n")
 
-with open(cam3_sc_log, "w") as f:
-    for item in tqdm(os.listdir(cam3_dir)):
-        img_path = os.path.join(cam3_dir, item)
-        img = cv2.imread(img_path)[:, :, ::-1]
-        score = sharpness_score(fft_process(img))
-        cam3_sc_arr.append(score)
-        f.write(f"score for {item} = {score}\n")
+for item in tqdm(os.listdir(cam3_dir)):
+    img_path = os.path.join(cam3_dir, item)
+    img = cv2.imread(img_path)[:, :, ::-1]
+    score = sharpness_score(fft_process(img))
+    cam3_sc_dict[item] = score
 
-np.save(cam2_arr_path, cam2_sc_arr)
-np.save(cam3_arr_path, cam3_sc_arr)
+
+with open(cam2_dict_path, "w") as f:
+    json.dump(cam2_dict_path, f, indent=4)
+
+with open(cam3_dict_path, "w") as f:
+    json.dump(cam3_dict_path, f, indent=4)

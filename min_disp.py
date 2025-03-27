@@ -1,8 +1,9 @@
+import numpy as np
+
 from utils import find_min_disp
 import os
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
 
 pcd_dir = "datasets/data/test_2_14/in/lidar"
 
@@ -38,9 +39,26 @@ for item in tqdm(os.listdir(pcd_dir)):
     w1_arr.append(w1)
     w2_arr.append(w2)
 
-plt.hist(disp_arr, bins=50, edgecolor='black')
+for i in range(len(w1_arr)):
+    print(w1_arr[i])
+    print(w2_arr[i])
+    print(disp_arr[i])
+    print("\n")
+
+np.save("datasets/data/min_disp/cam2_LR_dist.npy", np.array(w1_arr))
+np.save("datasets/data/min_disp/cam3_LR_dist.npy", np.array(w2_arr))
+
+plt.hist(disp_arr, bins=25, edgecolor='black')
+plt.xlabel("min disparity")
+plt.ylabel("number of frames")
 plt.show()
-plt.hist(w1_arr, bins=50, edgecolor='black')
+
+plt.hist(w1_arr, bins=25, edgecolor='black')
+plt.xlabel("depth of min disparity point")
+plt.ylabel("number of frames")
 plt.show()
-plt.hist(w2_arr, bins=50, edgecolor='black')
+
+plt.hist(w2_arr, bins=25, edgecolor='black')
+plt.xlabel("depth of min disparity point")
+plt.ylabel("number of frames")
 plt.show()
