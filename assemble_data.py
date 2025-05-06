@@ -1,14 +1,14 @@
 import os
 import shutil
 
-datasets_dir = "datasets/data/test_2_9"
+datasets_dir = "datasets/test_5_5"
 
 src_dirs = []
 for item in os.listdir(datasets_dir):
-    if os.path.isdir(os.path.join(datasets_dir, item)) and item != "in" and item != "out":
+    if os.path.isdir(os.path.join(datasets_dir, item)) and item != "in" and item != "out" and item != "May_5_RoadTest":
         src_dirs.append(os.path.join(datasets_dir, item))
 
-des_dir = "datasets/data/test_2_9/in"
+des_dir = "datasets/test_5_5/parked_dynamic_scene"
 des_cam2_dir = os.path.join(des_dir, "cam2_img")
 des_cam3_dir = os.path.join(des_dir, "cam3_img")
 des_lidar_dir = os.path.join(des_dir, "lidar")

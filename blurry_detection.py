@@ -3,6 +3,7 @@ import cv2
 from tqdm import tqdm
 import os
 import json
+import matplotlib.pyplot as plt
 
 
 def fft_process(image, draw=False):
@@ -27,9 +28,9 @@ def sharpness_score(m):
     return np.sum(score_mat * m)
 
 
-data_dir = "datasets/data/test_2_14/in"
-cam2_dir = "datasets/data/test_2_14/in/cam2_img"
-cam3_dir = "datasets/data/test_2_14/in/cam3_img"
+data_dir = "datasets/test_5_5/May_5_RoadTest"
+cam2_dir = os.path.join(data_dir, "cam2_img")
+cam3_dir = os.path.join(data_dir, "cam3_img")
 
 cam2_sc_dict = {}
 cam3_sc_dict = {}
@@ -51,7 +52,31 @@ for item in tqdm(os.listdir(cam3_dir)):
 
 
 with open(cam2_dict_path, "w") as f:
-    json.dump(cam2_dict_path, f, indent=4)
+    json.dump(cam2_sc_dict, f, indent=4)
 
 with open(cam3_dict_path, "w") as f:
-    json.dump(cam3_dict_path, f, indent=4)
+    json.dump(cam3_sc_dict, f, indent=4)
+
+bins = np.arange(0, 251, 1)
+cam2_sharpness_path = os.path.join(data_dir, "cam2_sharpness.png")
+cam3_sharpness_path = os.path.join(data_dir, "cam3_sharpness.png")
+
+cam2_sharpness = list(cam2_sc_dict.values())
+cam3_sharpness = list(cam3_sc_dict.values())
+
+plt.hist(cam2_sharpness, bins=bins, edgecolor='black')
+plt.xlabel("sharpness score", fontsize=16)
+plt.ylabel("num of frames", fontsize=16)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.savefig(cam2_sharpness_path, dpi=300, bbox_inches='tight')
+
+plt.hist(cam3_sharpness, bins=bins, edgecolor='black')
+plt.xlabel("sharpness score", fontsize=16)
+plt.ylabel("num of frames", fontsize=16)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.savefig(cam3_sharpness_path, dpi=300, bbox_inches='tight')
+
+print(f"cam2 number of sharpness > 250 = {sum(1 for _ in cam2_sharpness if _ > 250)}")
+print(f"cam3 number of sharpness > 250 = {sum(1 for _ in cam3_sharpness if _ > 250)}")
