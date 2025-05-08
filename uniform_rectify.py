@@ -3,14 +3,16 @@ import os
 import cv2
 from tqdm import tqdm
 
-img_left_dir = "datasets/data/test_2_14/in/cam2_img"
-img_right_dir = "datasets/data/test_2_14/in/cam3_img"
+dataset_dir = "datasets/test_5_5"
 
-rec_left_dir = "datasets/data/test_2_14/in_rec/cam2_img"
-rec_right_dir = "datasets/data/test_2_14/in_rec/cam3_img"
+img_left_dir = os.path.join(dataset_dir, "in/cam2_img")
+img_right_dir = os.path.join(dataset_dir, "in/cam3_img")
 
-uni_rec_left_dir = "datasets/data/test_2_14/in_uni_rec/cam2_img"
-uni_rec_right_dir = "datasets/data/test_2_14/in_uni_rec/cam3_img"
+rec_left_dir = os.path.join(dataset_dir, "in_rec/cam2_img")
+rec_right_dir = os.path.join(dataset_dir, "in_rec/cam3_img")
+
+uni_rec_left_dir = os.path.join(dataset_dir, "in_uni_rec/cam2_img")
+uni_rec_right_dir = os.path.join(dataset_dir, "in_uni_rec/cam3_img")
 
 os.makedirs(rec_left_dir, exist_ok=True)
 os.makedirs(rec_right_dir, exist_ok=True)
