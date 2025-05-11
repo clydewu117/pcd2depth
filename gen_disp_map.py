@@ -67,31 +67,33 @@ in_ex_right = cam2_in_mat, cam2_ex_mat
 neg_depth_arr = []
 pos_depth_arr = []
 
-for item in tqdm(os.listdir(pcd_dir)):
-    pcd_path = os.path.join(pcd_dir, item)
-    item_name = os.path.splitext(item)[0]
-    img_path = os.path.join(img_dir, f"{item_name}.png")
-    out_path = os.path.join(out_dir, f"{item_name}_disp.png")
-
-    neg, pos = pcd2disp_pn(pcd_path, img_path, in_ex_left, in_ex_right, out_path)
-    neg_depth_arr += neg
-    pos_depth_arr += pos
-
-np.save("datasets/test_5_5/pn_disp/neg_depth_arr.npy", np.array(neg_depth_arr))
-np.save("datasets/test_5_5/pn_disp/pos_depth_arr.npy", np.array(pos_depth_arr))
+# for item in tqdm(os.listdir(pcd_dir)):
+#     pcd_path = os.path.join(pcd_dir, item)
+#     item_name = os.path.splitext(item)[0]
+#     img_path = os.path.join(img_dir, f"{item_name}.png")
+#     out_path = os.path.join(out_dir, f"{item_name}_disp.png")
+#
+#     neg, pos = pcd2disp_pn(pcd_path, img_path, in_ex_left, in_ex_right, out_path)
+#     neg_depth_arr += neg
+#     pos_depth_arr += pos
+#
+# np.save("datasets/test_5_5/pn_disp/neg_depth_arr.npy", np.array(neg_depth_arr))
+# np.save("datasets/test_5_5/pn_disp/pos_depth_arr.npy", np.array(pos_depth_arr))
 
 neg_depth_arr = np.load("datasets/test_5_5/pn_disp/neg_depth_arr.npy", allow_pickle=True).tolist()
 pos_depth_arr = np.load("datasets/test_5_5/pn_disp/pos_depth_arr.npy", allow_pickle=True).tolist()
 
+file_count = len(os.listdir(img_dir))
+
 min_neg, max_neg = min(neg_depth_arr), max(neg_depth_arr)
-bins_neg = np.linspace(min_neg, max_neg, 50)
+bins_neg = np.arange(0, 501, 10)
 
 counts_neg, bins_neg = np.histogram(neg_depth_arr, bins=bins_neg)
-normalized_counts_neg = counts_neg / 164
+normalized_counts_neg = counts_neg / file_count
 
 print(min(neg_depth_arr))
+plt.figure()
 plt.bar(bins_neg[:-1], normalized_counts_neg, width=np.diff(bins_neg), edgecolor='black', align='edge')
-plt.legend(fontsize=16)
 plt.xlabel("depth", fontsize=16)
 plt.ylabel("number of points", fontsize=16)
 plt.title("depth where disparity is reversed", fontsize=16)
@@ -100,11 +102,12 @@ plt.yticks(fontsize=16)
 plt.savefig("datasets/test_5_5/pn_disp/neg_disp.png", dpi=300)
 
 min_pos, max_pos = min(pos_depth_arr), max(pos_depth_arr)
-bins_pos = np.linspace(min_pos, max_pos, 50)
+bins_pos = np.linspace(0, 501, 10)
 
 counts_pos, bins_pos = np.histogram(pos_depth_arr, bins=bins_pos)
-normalized_counts_pos = counts_pos / 164
+normalized_counts_pos = counts_pos / file_count
 
+plt.figure()
 plt.bar(bins_pos[:-1], normalized_counts_pos, width=np.diff(bins_pos), edgecolor='black', align='edge')
 plt.xlabel("depth", fontsize=16)
 plt.ylabel("number of points", fontsize=16)
