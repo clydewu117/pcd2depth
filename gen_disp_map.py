@@ -102,7 +102,7 @@ plt.yticks(fontsize=16)
 plt.savefig("datasets/test_5_5/pn_disp/neg_disp.png", dpi=300)
 
 min_pos, max_pos = min(pos_depth_arr), max(pos_depth_arr)
-bins_pos = np.linspace(0, 501, 10)
+bins_pos = np.arange(0, 501, 10)
 
 counts_pos, bins_pos = np.histogram(pos_depth_arr, bins=bins_pos)
 normalized_counts_pos = counts_pos / file_count
