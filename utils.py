@@ -298,54 +298,6 @@ def find_best_match_px(target_px, px_list):
     return best_match_index
 
 
-def gen_cross_map(img1_path, img2_path, out_path):
-    img1 = cv2.imread(img1_path, cv2.IMREAD_COLOR)
-    img2 = cv2.imread(img2_path, cv2.IMREAD_COLOR)
-
-    cross_map = cv2.subtract(img1, img2)
-
-    cv2.imwrite(out_path, cross_map)
-
-
-def find_min_disp(pcd_path, ex_mat1, in_mat1, ex_mat2, in_mat2, height, width):
-    pcd = o3d.io.read_point_cloud(pcd_path)
-    points = np.asarray(pcd.points)  # Shape: (N, 3)
-
-    # Convert points to homogeneous coordinates (N, 4)
-    points_h = np.hstack((points, np.ones((points.shape[0], 1))))  # (N, 4)
-
-    # Project points to first camera
-    cam1_points = (ex_mat1 @ points_h.T).T  # (N, 4)
-    px1 = (in_mat1 @ cam1_points.T).T  # (N, 3)
-    w1 = px1[:, 2]
-    u1 = np.round(px1[:, 0] / w1).astype(int)
-    v1 = np.round(px1[:, 1] / w1).astype(int)
-
-    # Project points to second camera
-    cam2_points = (ex_mat2 @ points_h.T).T  # (N, 4)
-    px2 = (in_mat2 @ cam2_points.T).T  # (N, 3)
-    w2 = px2[:, 2]
-    u2 = np.round(px2[:, 0] / w2).astype(int)
-    v2 = np.round(px2[:, 1] / w2).astype(int)
-
-    # Filter points inside image bounds
-    valid_mask = (v1 < height) & (v2 < height) & (u1 < width) & (u2 < width)
-
-    # Compute disparity only for valid points
-    disp_arr = np.linalg.norm(np.vstack((u1, v1)).T - np.vstack((u2, v2)).T, axis=1)
-    disp_arr = disp_arr[valid_mask]
-    w1_valid = w1[valid_mask]
-    w2_valid = w2[valid_mask]
-
-    # Get minimum disparity and corresponding depths
-    min_idx = np.argmin(disp_arr)
-    min_disp = disp_arr[min_idx]
-    w1_depth = w1_valid[min_idx]
-    w2_depth = w2_valid[min_idx]
-
-    return min_disp, w1_depth, w2_depth
-
-
 def pcd2disp_pn(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size=(5472, 3648)):
     width = size[0]
     height = size[1]
