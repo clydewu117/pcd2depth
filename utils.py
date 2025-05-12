@@ -406,11 +406,10 @@ def pcd2disp_pn(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size
 
     return neg_disp_arr, pos_disp_arr
 
-def pcd2disp(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size=(5472, 3648)):
+
+def pcd2disp(pcd_path, in_ex_left, in_ex_right, out_path, size=(5472, 3648)):
     width = size[0]
     height = size[1]
-
-    img = cv2.imread(left_img_path)
 
     pcd = o3d.io.read_point_cloud(pcd_path)
     points = np.asarray(pcd.points)  # Shape: (N, 3)
@@ -433,15 +432,29 @@ def pcd2disp(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size=(5
     vr = np.round(right_px[:, 1] / wr).astype(int)
 
     # Filter points inside image bounds
-    valid_mask = (ul < width) & (ur < width) & (vl < height) & (vr < height)
-    valid_mask &= (ul >= 0) & (vl >= 0) & (ur >= 0) & (vr >= 0)
+    valid_bound_mask = (ul < width) & (ur < width) & (vl < height) & (vr < height)
+    valid_bound_mask &= (ul >= 0) & (vl >= 0) & (ur >= 0) & (vr >= 0)
 
-    ul = ul[valid_mask]
-    vl = vl[valid_mask]
-    ur = ur[valid_mask]
+    ul = ul[valid_bound_mask]
+    vl = vl[valid_bound_mask]
+    ur = ur[valid_bound_mask]
 
+    # Filter points with positive disparity
     disparity = ul - ur
-    disp_map = np.zeros((height, width), dtype=np.int32)
-    disp_map[vl, ul] = disparity
+    max_disp = np.max(disparity)
+    min_disp = np.min(disparity)
+    valid_disp_mask = disparity > 0
+    ul = ul[valid_disp_mask]
+    vl = vl[valid_disp_mask]
+    disparity = disparity[valid_disp_mask].astype(np.float32)
 
-    return max(disparity), min(disparity)
+    # Normalize disparity
+    disp_norm = (disparity / 1000 * 65535).astype(np.uint16)
+
+    # Fill disparity map and save
+    disp_map = np.zeros((height, width), dtype=np.uint16)
+    disp_map[vl, ul] = disp_norm
+
+    cv2.imwrite(out_path, disp_map)
+
+    return max_disp, min_disp

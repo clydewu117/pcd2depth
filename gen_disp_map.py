@@ -73,7 +73,7 @@ for item in tqdm(os.listdir(pcd_dir)):
     img_path = os.path.join(img_dir, f"{item_name}.png")
     out_path = os.path.join(out_dir, f"{item_name}.png")
 
-    max_disp, min_disp = pcd2disp(pcd_path, img_path, in_ex_left, in_ex_right, out_path)
+    max_disp, min_disp = pcd2disp(pcd_path, in_ex_left, in_ex_right, out_path)
 
     max_disp_arr.append(max_disp)
     min_disp_arr.append(min_disp)
