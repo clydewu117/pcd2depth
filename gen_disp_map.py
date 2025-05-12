@@ -75,6 +75,9 @@ for item in tqdm(os.listdir(pcd_dir)):
 
     max_disp, min_disp = pcd2disp(pcd_path, img_path, in_ex_left, in_ex_right, out_path)
 
+    max_disp_arr.append(max_disp)
+    min_disp_arr.append(min_disp)
+
 np.save("datasets/test_5_5/max_disp_arr.npy", np.array(max_disp_arr))
 np.save("datasets/test_5_5/min_disp_arr.npy", np.array(min_disp_arr))
 
