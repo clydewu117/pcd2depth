@@ -439,27 +439,9 @@ def pcd2disp(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size=(5
     ul = ul[valid_mask]
     vl = vl[valid_mask]
     ur = ur[valid_mask]
-    wl = wl[valid_mask]
 
     disparity = ul - ur
     disp_map = np.zeros((height, width), dtype=np.int32)
     disp_map[vl, ul] = disparity
 
-    depth_map = np.zeros((height, width), dtype=np.uint16)
-    depth_map[vl, ul] = wl
-
-    neg_disp_arr = []
-    v_neg, u_neg = np.where(disp_map < 0)
-    neg_disp_arr = depth_map[v_neg, u_neg].tolist()
-    for i in range(len(u_neg)):
-        center = u_neg[i], v_neg[i]
-        cv2.circle(img, center, radius=10, color=(0, 0, 255), thickness=-1)
-
-    pos_disp_arr = []
-    v_pos, u_pos = np.where(disp_map > 0)
-    pos_disp_arr = depth_map[v_pos, u_pos].tolist()
-    for i in range(len(u_pos)):
-        center = u_pos[i], v_pos[i]
-        cv2.circle(img, center, radius=10, color=(255, 0, 0), thickness=-1)
-
-    cv2.imwrite(out_path, disp_map)
+    return max(disparity), min(disparity)
