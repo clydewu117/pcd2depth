@@ -126,21 +126,21 @@ in_ex_right = cam2_in_mat, cam2_ex_mat
 neg_depth_arr = []
 pos_depth_arr = []
 
-# for item in tqdm(os.listdir(pcd_dir)):
-#     pcd_path = os.path.join(pcd_dir, item)
-#     item_name = os.path.splitext(item)[0]
-#     img_path = os.path.join(img_dir, f"{item_name}.png")
-#     out_path = os.path.join(out_dir, f"{item_name}_pn_disp.png")
-#
-#     neg, pos = pcd2disp_pn(pcd_path, img_path, in_ex_left, in_ex_right, out_path)
-#     neg_depth_arr += neg
-#     pos_depth_arr += pos
-#
-# np.save("datasets/test_5_5/pn_disp/neg_depth_arr.npy", np.array(neg_depth_arr))
-# np.save("datasets/test_5_5/pn_disp/pos_depth_arr.npy", np.array(pos_depth_arr))
+for item in tqdm(os.listdir(pcd_dir)):
+    pcd_path = os.path.join(pcd_dir, item)
+    item_name = os.path.splitext(item)[0]
+    img_path = os.path.join(img_dir, f"{item_name}.png")
+    out_path = os.path.join(out_dir, f"{item_name}_pn_disp.png")
 
-neg_depth_arr = np.load("datasets/test_5_5/pn_disp/neg_depth_arr.npy", allow_pickle=True).tolist()
-pos_depth_arr = np.load("datasets/test_5_5/pn_disp/pos_depth_arr.npy", allow_pickle=True).tolist()
+    neg, pos = pcd2disp_pn(pcd_path, img_path, in_ex_left, in_ex_right, out_path)
+    neg_depth_arr += neg
+    pos_depth_arr += pos
+
+np.save("datasets/test_5_5/pn_disp1/neg_depth_arr.npy", np.array(neg_depth_arr))
+np.save("datasets/test_5_5/pn_disp1/pos_depth_arr.npy", np.array(pos_depth_arr))
+
+neg_depth_arr = np.load("datasets/test_5_5/pn_disp1/neg_depth_arr.npy", allow_pickle=True).tolist()
+pos_depth_arr = np.load("datasets/test_5_5/pn_disp1/pos_depth_arr.npy", allow_pickle=True).tolist()
 
 file_count = len(os.listdir(img_dir))
 
@@ -158,7 +158,7 @@ plt.ylabel("number of points", fontsize=16)
 plt.title("depth where disparity is reversed", fontsize=16)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
-plt.savefig("datasets/test_5_5/pn_disp/neg_disp.png", dpi=300)
+plt.savefig("datasets/test_5_5/pn_disp1/neg_disp.png", dpi=300)
 
 min_pos, max_pos = min(pos_depth_arr), max(pos_depth_arr)
 bins_pos = np.arange(0, 501, 10)
@@ -173,4 +173,4 @@ plt.ylabel("number of points", fontsize=16)
 plt.title("depth where disparity is normal", fontsize=16)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
-plt.savefig("datasets/test_5_5/pn_disp/pos_disp.png", dpi=300)
+plt.savefig("datasets/test_5_5/pn_disp1/pos_disp.png", dpi=300)
