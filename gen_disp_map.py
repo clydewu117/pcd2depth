@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 dataset_dir = "datasets/test_5_5"
 
-img_dir = "datasets/test_5_5/in/cam3_img"
-pcd_dir = "datasets/test_5_5/in/lidar"
-out_dir = "datasets/test_5_5/disp"
+img_dir = os.path.join(dataset_dir, "in/cam3_img")
+pcd_dir = os.path.join(dataset_dir, "in/lidar")
+out_dir = os.path.join(dataset_dir, "disp")
 
 os.makedirs(out_dir, exist_ok=True)
 
@@ -78,11 +78,11 @@ for item in tqdm(os.listdir(pcd_dir)):
     max_disp_arr.append(max_disp)
     min_disp_arr.append(min_disp)
 
-np.save("datasets/test_5_5/max_disp_arr.npy", np.array(max_disp_arr))
-np.save("datasets/test_5_5/min_disp_arr.npy", np.array(min_disp_arr))
+np.save(os.path.join(dataset_dir, "max_disp_arr.npy"), np.array(max_disp_arr))
+np.save(os.path.join(dataset_dir, "min_disp_arr.npy"), np.array(min_disp_arr))
 
-max_disp_arr = np.load("datasets/test_5_5/max_disp_arr.npy", allow_pickle=True).tolist()
-min_disp_arr = np.load("datasets/test_5_5/min_disp_arr.npy", allow_pickle=True).tolist()
+max_disp_arr = np.load(os.path.join(dataset_dir, "max_disp_arr.npy"), allow_pickle=True).tolist()
+min_disp_arr = np.load(os.path.join(dataset_dir, "min_disp_arr.npy"), allow_pickle=True).tolist()
 
 print(f"max disp: {max(max_disp_arr)}")
 print(f"min disp: {min(min_disp_arr)}")

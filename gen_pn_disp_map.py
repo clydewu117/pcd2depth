@@ -5,31 +5,31 @@ import numpy as np
 from utils import pcd2disp_pn
 from tqdm import tqdm
 
-dataset_dir = "datasets/test_5_5"
+dataset_dir = "datasets/test_5_14"
 
-img_dir = "datasets/test_5_5/in/cam3_img"
-pcd_dir = "datasets/test_5_5/in/lidar"
-out_dir = "datasets/test_5_5/pn_disp1/maps"
+img_dir = os.path.join(dataset_dir, "in/cam3_img")
+pcd_dir = os.path.join(dataset_dir, "in/lidar")
+out_dir = os.path.join(dataset_dir, "pn_disp/maps")
 
 os.makedirs(out_dir, exist_ok=True)
 
-# May 12 calibration
+# May 14 calibration
 cam3_ex_mat = [[
-                        0.999613,
-                        0.0194676,
-                        0.0115788,
+                        0.999639,
+                        0.0180872,
+                        0.0115616,
                         0.250893
                     ],
                     [
-                        0.0104086,
-                        0.05054,
-                        -0.998686,
+                        0.0104777,
+                        0.0496413,
+                        -0.99873,
                         -0.0072955
                     ],
                     [
-                        -0.0198467,
-                        0.998423,
-                        0.0498983,
+                        -0.0184576,
+                        0.998493,
+                        0.0490144,
                         0.0234565
                     ],
                     [
@@ -40,21 +40,21 @@ cam3_ex_mat = [[
                     ]]
 
 cam2_ex_mat = [[
-                        0.999941,
-                        0.00929654,
-                        0.00586799,
+                        0.999956,
+                        0.00753269,
+                        0.00585914,
                         -0.25716
                     ],
                     [
-                        0.00562645,
-                        0.00627855,
-                        -0.999981,
+                        0.00563727,
+                        0.00513034,
+                        -0.999987,
                         -0.00087487
                     ],
                     [
-                        -0.00915342,
-                        0.999811,
-                        0.00578637,
+                        -0.00738311,
+                        0.999832,
+                        0.00464831,
                         0.0207079
                     ],
                     [
@@ -64,13 +64,73 @@ cam2_ex_mat = [[
                         1
                     ]]
 
+cam3_in_mat = [[30904.3, 0, 2446.95, 0],
+               [0, 30142.5, 583.125, 0],
+               [0, 0, 1.0, 0]]
+
 cam2_in_mat = [[30895, 0, 2831.44, 0],
                [0, 29602.9, 1866.63, 0],
                [0, 0, 1.0, 0]]
 
-cam3_in_mat = [[30904.3, 0, 2446.95, 0],
-               [0, 30142.5, 583.125, 0],
-               [0, 0, 1.0, 0]]
+# May 12 calibration
+# cam3_ex_mat = [[
+#                         0.999613,
+#                         0.0194676,
+#                         0.0115788,
+#                         0.250893
+#                     ],
+#                     [
+#                         0.0104086,
+#                         0.05054,
+#                         -0.998686,
+#                         -0.0072955
+#                     ],
+#                     [
+#                         -0.0198467,
+#                         0.998423,
+#                         0.0498983,
+#                         0.0234565
+#                     ],
+#                     [
+#                         0,
+#                         0,
+#                         0,
+#                         1
+#                     ]]
+#
+# cam2_ex_mat = [[
+#                         0.999941,
+#                         0.00929654,
+#                         0.00586799,
+#                         -0.25716
+#                     ],
+#                     [
+#                         0.00562645,
+#                         0.00627855,
+#                         -0.999981,
+#                         -0.00087487
+#                     ],
+#                     [
+#                         -0.00915342,
+#                         0.999811,
+#                         0.00578637,
+#                         0.0207079
+#                     ],
+#                     [
+#                         0,
+#                         0,
+#                         0,
+#                         1
+#                     ]]
+#
+# cam3_in_mat = [[30904.3, 0, 2446.95, 0],
+#                [0, 30142.5, 583.125, 0],
+#                [0, 0, 1.0, 0]]
+#
+# cam2_in_mat = [[30895, 0, 2831.44, 0],
+#                [0, 29602.9, 1866.63, 0],
+#                [0, 0, 1.0, 0]]
+
 
 # May 5th calibration
 # cam2_in_mat = [[30895, 0, 2831.44, 0],
@@ -136,11 +196,11 @@ for item in tqdm(os.listdir(pcd_dir)):
     neg_depth_arr += neg
     pos_depth_arr += pos
 
-np.save("datasets/test_5_5/pn_disp1/neg_depth_arr.npy", np.array(neg_depth_arr))
-np.save("datasets/test_5_5/pn_disp1/pos_depth_arr.npy", np.array(pos_depth_arr))
+np.save(os.path.join(dataset_dir, "pn_disp/neg_depth_arr.npy"), np.array(neg_depth_arr))
+np.save(os.path.join(dataset_dir, "pn_disp/pos_depth_arr.npy"), np.array(pos_depth_arr))
 
-neg_depth_arr = np.load("datasets/test_5_5/pn_disp1/neg_depth_arr.npy", allow_pickle=True).tolist()
-pos_depth_arr = np.load("datasets/test_5_5/pn_disp1/pos_depth_arr.npy", allow_pickle=True).tolist()
+neg_depth_arr = np.load(os.path.join(dataset_dir, "pn_disp/neg_depth_arr.npy"), allow_pickle=True).tolist()
+pos_depth_arr = np.load(os.path.join(dataset_dir, "pn_disp/pos_depth_arr.npy"), allow_pickle=True).tolist()
 
 file_count = len(os.listdir(img_dir))
 
@@ -158,7 +218,7 @@ plt.ylabel("number of points", fontsize=16)
 plt.title("depth where disparity is reversed", fontsize=16)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
-plt.savefig("datasets/test_5_5/pn_disp1/neg_disp.png", dpi=300)
+plt.savefig(os.path.join(dataset_dir, "pn_disp/neg_disp.png"), dpi=300)
 
 min_pos, max_pos = min(pos_depth_arr), max(pos_depth_arr)
 bins_pos = np.arange(0, 501, 10)
@@ -173,4 +233,4 @@ plt.ylabel("number of points", fontsize=16)
 plt.title("depth where disparity is normal", fontsize=16)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
-plt.savefig("datasets/test_5_5/pn_disp1/pos_disp.png", dpi=300)
+plt.savefig(os.path.join(dataset_dir, "pn_disp/pos_disp.png"), dpi=300)
