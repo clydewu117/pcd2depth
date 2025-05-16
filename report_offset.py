@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from utils import eliminate_offset, pcd2depth, depth_overlay, report_avg_offset
 
-data_dir = "datasets/test_5_5/May_5_RoadTest"
+data_dir = "datasets/test_5_14/in"
 
 img_left_dir = os.path.join(data_dir, "cam2_img")
 img_right_dir = os.path.join(data_dir, "cam3_img")
@@ -17,16 +17,16 @@ avg_offset_path = os.path.join(data_dir, "avg_offset_arr_100.npy")
 
 avg_offset_arr = []
 
-# for item in tqdm(os.listdir(img_left_dir)):
-#     item_name = os.path.splitext(item)[0]
-#
-#     left_img_path = os.path.join(img_left_dir, f"{item_name}.png")
-#     right_img_path = os.path.join(img_right_dir, f"{item_name}.png")
-#
-#     report_avg, avg_offset = report_avg_offset(left_img_path, right_img_path, item_name, block_h=3000, step=100)
-#     avg_offset_arr.append(avg_offset)
-#
-# np.save(avg_offset_path, avg_offset_arr)
+for item in tqdm(os.listdir(img_left_dir)):
+    item_name = os.path.splitext(item)[0]
+
+    left_img_path = os.path.join(img_left_dir, f"{item_name}.png")
+    right_img_path = os.path.join(img_right_dir, f"{item_name}.png")
+
+    report_avg, avg_offset = report_avg_offset(left_img_path, right_img_path, item_name, block_h=3000, step=100)
+    avg_offset_arr.append(avg_offset)
+
+np.save(avg_offset_path, avg_offset_arr)
 
 avg_offset_arr = np.load(avg_offset_path, allow_pickle=True).tolist()
 
