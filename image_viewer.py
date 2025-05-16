@@ -2,7 +2,7 @@ import os
 from tqdm import tqdm
 import shutil
 
-dataset_dir = "datasets/test_5_5/in"
+dataset_dir = "datasets/test_5_14/in"
 
 left_dir = os.path.join(dataset_dir, "cam3_img")
 right_dir = os.path.join(dataset_dir, "cam2_img")
