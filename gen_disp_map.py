@@ -125,7 +125,7 @@ in_ex_right = cam2_in_mat, cam2_ex_mat
 max_disp_arr = []
 min_disp_arr = []
 
-for item in tqdm(os.listdir(pcd_dir)):
+for item in tqdm(sorted(os.listdir(pcd_dir))):
     pcd_path = os.path.join(pcd_dir, item)
     item_name = os.path.splitext(item)[0]
     img_path = os.path.join(img_dir, f"{item_name}.png")

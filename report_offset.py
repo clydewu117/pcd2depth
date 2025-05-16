@@ -19,15 +19,15 @@ offset_log_path = os.path.join(data_dir, "offset_log.txt")
 avg_offset_arr = []
 
 with open(offset_log_path, "w") as f:
-    for item in tqdm(os.listdir(img_left_dir)):
+    for item in tqdm(sorted(os.listdir(img_left_dir))):
         item_name = os.path.splitext(item)[0]
 
         left_img_path = os.path.join(img_left_dir, f"{item_name}.png")
         right_img_path = os.path.join(img_right_dir, f"{item_name}.png")
 
-        report_avg, avg_offset = report_avg_offset(left_img_path, right_img_path, item_name, block_h=3000, step=100)
+        avg_offset = report_avg_offset(left_img_path, right_img_path, item_name, block_h=3000, step=100)
         avg_offset_arr.append(avg_offset)
-        f.write(f"{item}\t{report_avg}\n")
+        f.write(f"{item}\t{avg_offset}\n")
 
 np.save(avg_offset_path, avg_offset_arr)
 
