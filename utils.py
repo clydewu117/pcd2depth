@@ -259,7 +259,6 @@ def report_avg_offset(img1_path, img2_path, name, block_h=3000, step=100):
         _, _, _, max_loc = cv2.minMaxLoc(result)
         _, match_top = max_loc
         offset_arr.append(abs(y - match_top))
-        print(y, abs(y - match_top))
         y += step
 
     avg_offset = statistics.mean(offset_arr)
