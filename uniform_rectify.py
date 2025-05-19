@@ -47,7 +47,7 @@ for item in tqdm(os.listdir(cam2_img_dir)):
 
 min_h = min(height_arr)
 
-for item in cam2_img_dict.keys():
+for item in tqdm(cam2_img_dict.keys()):
     cam2_img = cam2_img_dict[item]
     cam3_img = cam3_img_dict[item]
     disp = disp_dict[item]
