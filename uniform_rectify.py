@@ -5,54 +5,60 @@ from tqdm import tqdm
 
 dataset_dir = "datasets/test_5_5"
 
-img_left_dir = os.path.join(dataset_dir, "in/cam2_img")
-img_right_dir = os.path.join(dataset_dir, "in/cam3_img")
+cam2_img_dir = os.path.join(dataset_dir, "in/cam2_img")
+cam3_img_dir = os.path.join(dataset_dir, "in/cam3_img")
+disp_dir = os.path.join(dataset_dir, "in/disp")
 
-rec_left_dir = os.path.join(dataset_dir, "in_rec/cam2_img")
-rec_right_dir = os.path.join(dataset_dir, "in_rec/cam3_img")
+uni_rec_cam2_dir = os.path.join(dataset_dir, "in_uni_rec/cam2_img")
+uni_rec_cam3_dir = os.path.join(dataset_dir, "in_uni_rec/cam3_img")
+uni_rec_disp_dir = os.path.join(dataset_dir, "in_uni_rec/disp")
 
-uni_rec_left_dir = os.path.join(dataset_dir, "in_uni_rec/cam2_img")
-uni_rec_right_dir = os.path.join(dataset_dir, "in_uni_rec/cam3_img")
-
-os.makedirs(rec_left_dir, exist_ok=True)
-os.makedirs(rec_right_dir, exist_ok=True)
-os.makedirs(uni_rec_left_dir, exist_ok=True)
-os.makedirs(uni_rec_right_dir, exist_ok=True)
+os.makedirs(uni_rec_cam2_dir, exist_ok=True)
+os.makedirs(uni_rec_cam3_dir, exist_ok=True)
+os.makedirs(uni_rec_disp_dir, exist_ok=True)
 
 height_arr = []
+cam2_img_dict = {}
+cam3_img_dict = {}
+disp_dict = {}
 
-for item in tqdm(os.listdir(img_left_dir)):
-    item_name = os.path.splitext(item)[0]
+for item in tqdm(os.listdir(cam2_img_dir)):
 
-    img_left_path = os.path.join(img_left_dir, f"{item_name}.png")
-    img_right_path = os.path.join(img_right_dir, f"{item_name}.png")
+    cam2_img_path = os.path.join(cam2_img_dir, item)
+    cam3_img_path = os.path.join(cam3_img_dir, item)
+    disp_path = os.path.join(disp_dir, item)
 
-    rec_left_path = os.path.join(rec_left_dir, f"{item_name}.png")
-    rec_right_path = os.path.join(rec_right_dir, f"{item_name}.png")
+    cam2_img = cv2.imread(cam2_img_path, cv2.IMREAD_UNCHANGED)
+    cam3_img = cv2.imread(cam3_img_path, cv2.IMREAD_UNCHANGED)
+    disp = cv2.imread(disp_path, cv2.IMREAD_UNCHANGED)
 
-    eliminate_offset(img_left_path, img_right_path, rec_left_path, rec_right_path)
-    rec_img1 = cv2.imread(rec_left_path)
-    height_arr.append(rec_img1.shape[0])
+    offset = eliminate_offset(cam2_img, cam3_img)
 
-target_h = min(height_arr)
+    remain_h = cam2_img.shape[0] - offset
+    rec_cam2_img = cam2_img[:remain_h, :]
+    rec_cam3_img = cam3_img[offset:, :]
+    disp = disp[offset:, :]
 
-for item in tqdm(os.listdir(rec_left_dir)):
-    item_name = os.path.splitext(item)[0]
+    cam2_img_dict[item] = rec_cam2_img
+    cam3_img_dict[item] = rec_cam3_img
+    disp_dict[item] = disp
 
-    rec_left_path = os.path.join(rec_left_dir, f"{item_name}.png")
-    rec_right_path = os.path.join(rec_right_dir, f"{item_name}.png")
+    height_arr.append(remain_h)
 
-    uni_rec_left_path = os.path.join(uni_rec_left_dir, f"{item_name}.png")
-    uni_rec_right_path = os.path.join(uni_rec_right_dir, f"{item_name}.png")
+min_h = min(height_arr)
 
-    rec_img1 = cv2.imread(rec_left_path)
-    rec_img2 = cv2.imread(rec_right_path)
+for item in cam2_img_dict.keys():
+    cam2_img = cam2_img_dict[item]
+    cam3_img = cam3_img_dict[item]
+    disp = disp_dict[item]
 
-    height = rec_img1.shape[0]
-    h_diff = height - target_h
+    height = cam2_img.shape[0]
+    h_diff = height - min_h
 
-    uni_rec_img1 = rec_img1[h_diff:, :]
-    uni_rec_img2 = rec_img2[h_diff:, :]
+    uni_rec_cam2_img = cam2_img[h_diff:, :]
+    uni_rec_cam3_img = cam3_img[h_diff:, :]
+    uni_rec_disp = disp[h_diff:, :]
 
-    cv2.imwrite(uni_rec_left_path, uni_rec_img1)
-    cv2.imwrite(uni_rec_right_path, uni_rec_img2)
+    cv2.imwrite(os.path.join(uni_rec_cam2_dir, item), uni_rec_cam2_img)
+    cv2.imwrite(os.path.join(uni_rec_cam3_dir, item), uni_rec_cam3_img)
+    cv2.imwrite(os.path.join(uni_rec_disp_dir, item), uni_rec_disp)

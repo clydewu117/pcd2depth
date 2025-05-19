@@ -7,7 +7,7 @@ import png
 import statistics
 import tqdm
 # import math
-# from collections import Counter
+from collections import Counter
 # from PIL import Image
 
 
@@ -207,27 +207,23 @@ def get_stats1(pcd_path, width, height, in_mat, ex_mat):
     return count, depth_arr
 
 
-def eliminate_offset(img1_path, img2_path, save_path_img1, save_path_img2):
-    img1 = cv2.imread(img1_path)
-    img2 = cv2.imread(img2_path)
+def eliminate_offset(img1, img2, block_h=3000, step=100):
+    offset_arr = []
 
     height, width, _ = img1.shape
-    block_h = 3000
-    
-    cropped = img1[:block_h, :]
-    result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
-    _, _, _, max_loc = cv2.minMaxLoc(result)
 
-    _, match_top = max_loc
-    crop_h = height - match_top
+    for y in range(0, height, step):
+        if y + block_h > height:
+            break
+        cropped = img1[y:y+block_h, :]
+        result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
+        _, _, _, max_loc = cv2.minMaxLoc(result)
+        _, match_top = max_loc
+        offset_arr.append(match_top)
 
-    cropped_img1 = img1[:crop_h, :]
-    cropped_img2 = img2[match_top:, :]
-
-    cv2.imwrite(save_path_img1, cropped_img1)
-    cv2.imwrite(save_path_img2, cropped_img2)
-
-    return match_top
+    counter = Counter(offset_arr)
+    most_freq_offset = counter.most_common(1)[0][0]
+    return most_freq_offset
 
 
 def report_offset(img1_path, img2_path, name, block_h):

@@ -72,7 +72,7 @@ cam2_in_mat = [[30895, 0, 2831.44, 0],
                [0, 29602.9, 1866.63, 0],
                [0, 0, 1.0, 0]]
 
-# May 12 calibration
+# May 12 calibration for test_5_5
 # cam3_ex_mat = [[
 #                         0.999613,
 #                         0.0194676,
