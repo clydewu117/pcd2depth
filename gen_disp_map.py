@@ -8,7 +8,7 @@ dataset_dir = "datasets/test_5_5"
 
 img_dir = os.path.join(dataset_dir, "in/cam3_img")
 pcd_dir = os.path.join(dataset_dir, "in/lidar")
-out_dir = os.path.join(dataset_dir, "disp")
+out_dir = os.path.join(dataset_dir, "in/disp")
 
 os.makedirs(out_dir, exist_ok=True)
 
