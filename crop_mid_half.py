@@ -11,12 +11,12 @@ def crop_mid_half(input_path, output_path):
     cv2.imwrite(output_path, mid_half)
 
 
-data_dir = "datasets/test_5_5/in"
+data_dir = "datasets/test_5_5/in_uni_rec"
 cam2_dir = os.path.join(data_dir, "cam2_img")
 cam3_dir = os.path.join(data_dir, "cam3_img")
 disp_dir = os.path.join(data_dir, "disp")
 
-out_dir = "datasets/test_5_5/mid_half"
+out_dir = "datasets/test_5_5/uni_mid_half"
 cam2_out_dir = os.path.join(out_dir, "cam2_img")
 cam3_out_dir = os.path.join(out_dir, "cam3_img")
 disp_out_dir = os.path.join(out_dir, "disp")
