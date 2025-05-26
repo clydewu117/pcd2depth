@@ -11,16 +11,16 @@ os.makedirs(out_dir, exist_ok=True)
 
 
 def visualize_disp(disp_path, img_path, out_path):
-    disp = cv2.imread(disp_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
+    disp_map = cv2.imread(disp_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
     img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    valid_mask = disp > 0
+    valid_mask = disp_map > 0
     v, u = np.where(valid_mask)
-    disp = disp[v, u] / 65535 * 1000
+    disp = disp_map[v, u] / 65535 * 1000
     disp_norm = (disp / disp.max() * 255).astype(np.uint8)
 
-    disp_gray = np.zeros_like(img.shape[:2], dtype=np.uint8)
+    disp_gray = np.zeros_like(disp_map, dtype=np.uint8)
     disp_gray[v, u] = disp_norm
 
     color_map = cv2.applyColorMap(disp_gray, cv2.COLORMAP_JET)
