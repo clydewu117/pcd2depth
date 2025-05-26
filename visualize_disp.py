@@ -40,4 +40,4 @@ for item in tqdm(os.listdir(disp_dir)):
     img_path = os.path.join(img_dir, item)
     out_path = os.path.join(out_dir, item)
 
-    visualize_disp(disp_path, img_path, out_dir)
+    visualize_disp(disp_path, img_path, out_path)
