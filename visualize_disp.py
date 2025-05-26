@@ -20,7 +20,7 @@ def visualize_disp(disp_path, img_path, out_path):
     disp = disp[v, u] / 65535 * 1000
     disp_norm = (disp / disp.max()).astype(np.uint8)
 
-    disp_gray = np.zeros_like(img, dtype=np.uint8)
+    disp_gray = np.zeros_like(img.shape, dtype=np.uint8)
     disp_gray[v, u] = disp_norm
 
     color_map = cv2.applyColorMap(disp_gray, cv2.COLORMAP_JET)
