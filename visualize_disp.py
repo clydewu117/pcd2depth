@@ -17,7 +17,7 @@ def visualize_disp(disp_path, img_path, out_path):
 
     valid_mask = disp > 0
     v, u = np.where(valid_mask)
-    disp = disp[valid_mask] / 65535 * 1000
+    disp = disp[v, u] / 65535 * 1000
     disp_norm = (disp / disp.max()).astype(np.uint8)
 
     disp_gray = np.zeros_like(disp, dtype=np.uint8)
