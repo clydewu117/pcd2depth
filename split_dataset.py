@@ -27,12 +27,12 @@ split_lists = {s: [] for s in splits}
 
 file_list = sorted(f for f in os.listdir(os.path.join(dataset_dir, "cam2_img")) if f.endswith(".png"))
 
-for fname in file_list:
+for fname in tqdm(file_list):
     split = get_split(fname)
     if split is None:
         continue
 
-    for folder in tqdm(folders):
+    for folder in folders:
         src = os.path.join(dataset_dir, folder, fname)
         dst = os.path.join(out_dir, split, folder, fname)
         shutil.copyfile(src, dst)
