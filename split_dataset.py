@@ -1,5 +1,6 @@
 import os
 import shutil
+from tqdm import tqdm
 
 dataset_dir = "datasets/test_5_5/uni_mid_half"
 out_dir = "datasets/test_5_5/split"
@@ -31,7 +32,7 @@ for fname in file_list:
     if split is None:
         continue
 
-    for folder in folders:
+    for folder in tqdm(folders):
         src = os.path.join(dataset_dir, folder, fname)
         dst = os.path.join(out_dir, split, folder, fname)
         shutil.copyfile(src, dst)
