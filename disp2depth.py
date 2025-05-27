@@ -27,7 +27,7 @@ for item in tqdm(os.listdir(disp_dir)):
     depth_img = disp_img.copy()
     depth_img[~valid] = 0  # set invalid pixels to 0
     # convert disparity to depth
-    depth_img = conversion_factor / depth_img / 70
+    depth_img = conversion_factor / depth_img
     # set invalid pixels to 0
     depth_img[~valid] = 0
     depth_arr.extend(depth_img[valid].flatten())
