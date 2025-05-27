@@ -331,14 +331,12 @@ def pcd2disp_pn(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size
     depth_map = np.zeros((height, width), dtype=np.uint16)
     depth_map[vl, ul] = wl
 
-    neg_disp_arr = []
     v_neg, u_neg = np.where(disp_map < 0)
     neg_disp_arr = depth_map[v_neg, u_neg].tolist()
     for i in range(len(u_neg)):
         center = u_neg[i], v_neg[i]
         cv2.circle(img, center, radius=10, color=(0, 0, 255), thickness=-1)
 
-    pos_disp_arr = []
     v_pos, u_pos = np.where(disp_map > 0)
     pos_disp_arr = depth_map[v_pos, u_pos].tolist()
     for i in range(len(u_pos)):
@@ -348,6 +346,75 @@ def pcd2disp_pn(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size
     cv2.imwrite(out_path, img)
 
     return neg_disp_arr, pos_disp_arr
+
+
+def pcd2disp_pn_lr(pcd_path, left_img_path, right_img_path, in_ex_left, in_ex_right, left_out_path, right_out_path, size=(5472, 3648)):
+    width = size[0]
+    height = size[1]
+
+    left_img = cv2.imread(left_img_path)
+    right_img = cv2.imread(right_img_path)
+
+    pcd = o3d.io.read_point_cloud(pcd_path)
+    points = np.asarray(pcd.points)  # Shape: (N, 3)
+
+    # Convert points to homogeneous coordinates (N, 4)
+    points_h = np.hstack((points, np.ones((points.shape[0], 1))))  # (N, 4)
+
+    # Project points to left camera
+    left_points = (in_ex_left[1] @ points_h.T).T  # (N, 4)
+    left_px = (in_ex_left[0] @ left_points.T).T  # (N, 3)
+    wl = left_px[:, 2]
+    ul = np.round(left_px[:, 0] / wl).astype(int)
+    vl = np.round(left_px[:, 1] / wl).astype(int)
+
+    # Project points to right camera
+    right_points = (in_ex_right[1] @ points_h.T).T  # (N, 4)
+    right_px = (in_ex_right[0] @ right_points.T).T  # (N, 3)
+    wr = right_px[:, 2]
+    ur = np.round(right_px[:, 0] / wr).astype(int)
+    vr = np.round(right_px[:, 1] / wr).astype(int)
+
+    # Filter points inside image bounds
+    valid_mask = (ul < width) & (ur < width) & (vl < height) & (vr < height)
+    valid_mask &= (ul >= 0) & (vl >= 0) & (ur >= 0) & (vr >= 0)
+
+    ul = ul[valid_mask]
+    vl = vl[valid_mask]
+    ur = ur[valid_mask]
+    wl = wl[valid_mask]
+
+    disparity = ul - ur
+    left_disp_map = np.zeros((height, width), dtype=np.int32)
+    left_disp_map[vl, ul] = disparity
+    right_disp_map = np.zeros((height, width), dtype=np.int32)
+    right_disp_map[vr, ur] = disparity
+
+    depth_map = np.zeros((height, width), dtype=np.uint16)
+    depth_map[vl, ul] = wl
+
+    v_neg_l, u_neg_l = np.where(left_disp_map < 0)
+    for i in range(len(u_neg_l)):
+        center = u_neg_l[i], v_neg_l[i]
+        cv2.circle(left_img, center, radius=10, color=(0, 0, 255), thickness=-1)
+
+    v_pos_l, u_pos_l = np.where(left_disp_map > 0)
+    for i in range(len(u_pos_l)):
+        center = u_pos_l[i], v_pos_l[i]
+        cv2.circle(left_img, center, radius=10, color=(255, 0, 0), thickness=-1)
+
+    v_neg_r, u_neg_r = np.where(right_disp_map < 0)
+    for i in range(len(u_neg_r)):
+        center = u_neg_r[i], v_neg_r[i]
+        cv2.circle(right_img, center, radius=10, color=(0, 0, 255), thickness=-1)
+
+    v_pos_r, u_pos_r = np.where(right_disp_map > 0)
+    for i in range(len(u_pos_r)):
+        center = u_pos_r[i], v_pos_r[i]
+        cv2.circle(right_img, center, radius=10, color=(255, 0, 0), thickness=-1)
+
+    cv2.imwrite(left_out_path, left_img)
+    cv2.imwrite(right_out_path, right_img)
 
 
 def pcd2disp(pcd_path, in_ex_left, in_ex_right, out_path, size=(5472, 3648)):

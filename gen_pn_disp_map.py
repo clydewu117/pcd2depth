@@ -5,7 +5,7 @@ import numpy as np
 from utils import pcd2disp_pn
 from tqdm import tqdm
 
-dataset_dir = "datasets/test_5_14"
+dataset_dir = "datasets/test_5_5"
 
 img_dir = os.path.join(dataset_dir, "in/cam3_img")
 pcd_dir = os.path.join(dataset_dir, "in/lidar")
