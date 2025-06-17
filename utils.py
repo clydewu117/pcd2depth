@@ -90,13 +90,12 @@ def pcd2depth1(pcd_path, width, height, in_mat, ex_mat, out_path):
 
     # Normalize depth values for better visualization
     # max_depth = np.max(w)
-    depth_norm = 500
-    w_uint16 = (w / depth_norm * 65535).astype(np.uint16)
+    w_uint32 = (w * 256).astype(np.uint32)
 
     depth_map = np.full((height, width), 65535, dtype=np.uint16)
 
     for i in range(len(u)):
-        depth_map[v[i], u[i]] = np.minimum(w_uint16[i], depth_map[v[i], u[i]])
+        depth_map[v[i], u[i]] = np.minimum(w_uint32[i], depth_map[v[i], u[i]])
 
     depth_map[depth_map == 65535] = 0
     # max_depth = np.max(depth_map)
@@ -382,6 +381,7 @@ def pcd2disp_pn_lr(pcd_path, left_img_path, right_img_path, in_ex_left, in_ex_ri
     ul = ul[valid_mask]
     vl = vl[valid_mask]
     ur = ur[valid_mask]
+    vr = vr[valid_mask]
     wl = wl[valid_mask]
 
     disparity = ul - ur
