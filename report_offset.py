@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from utils import eliminate_offset, pcd2depth, depth_overlay, report_avg_offset
 
-data_dir = "datasets/test_5_14/in"
+data_dir = "datasets/test_7_13"
 
 img_left_dir = os.path.join(data_dir, "cam2_img")
 img_right_dir = os.path.join(data_dir, "cam3_img")
@@ -25,7 +25,9 @@ with open(offset_log_path, "w") as f:
         left_img_path = os.path.join(img_left_dir, f"{item_name}.png")
         right_img_path = os.path.join(img_right_dir, f"{item_name}.png")
 
-        avg_offset = report_avg_offset(left_img_path, right_img_path, item_name, block_h=3000, step=100)
+        avg_offset = report_avg_offset(
+            left_img_path, right_img_path, item_name, block_h=3000, step=100
+        )
         avg_offset_arr.append(avg_offset)
         f.write(f"{item}\t{avg_offset}\n")
 
@@ -37,12 +39,12 @@ print(sum(1 for x in avg_offset_arr if x > 100))
 
 bins = np.arange(0, 101, 1)
 
-plt.hist(avg_offset_arr, bins=bins, edgecolor='black')
+plt.hist(avg_offset_arr, bins=bins, edgecolor="black")
 plt.xlabel("avg vertical offset", fontsize=16)
 plt.ylabel("num of frames", fontsize=16)
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
-plt.savefig(dist_path, dpi=300, bbox_inches='tight')
+plt.savefig(dist_path, dpi=300, bbox_inches="tight")
 
 
 with open(stats_path, "w") as file:

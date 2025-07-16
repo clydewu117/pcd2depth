@@ -1,11 +1,11 @@
 import os
 from tqdm import tqdm
 
-dataset_dir = "datasets/test_5_14"
+dataset_dir = "datasets/test_6_20"
 
-cam2_dir = os.path.join(dataset_dir, "in/cam2_img")
-cam3_dir = os.path.join(dataset_dir, "in/cam3_img")
-pcd_dir = os.path.join(dataset_dir, "in/lidar")
+cam2_dir = os.path.join(dataset_dir, "cam2_img")
+cam3_dir = os.path.join(dataset_dir, "cam3_img")
+pcd_dir = os.path.join(dataset_dir, "lidar")
 
 for item in tqdm(os.listdir(pcd_dir)):
     name, _ = os.path.splitext(item)

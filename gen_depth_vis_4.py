@@ -1,16 +1,21 @@
 import os
 import numpy as np
 
-from utils import pcd2disp
+from utils import pcd2depth1, depth_overlay1
 from tqdm import tqdm
 
 dataset_dir = "datasets/test_7_13_temp"
 
 img_dir = os.path.join(dataset_dir, "in/cam3_img")
 pcd_dir = os.path.join(dataset_dir, "in/lidar")
-out_dir = os.path.join(dataset_dir, "in/disp")
+depth_dir = os.path.join(dataset_dir, "in/depth")
+depth_vis_dir = os.path.join(dataset_dir, "in/depth_vis")
+disp_dir = os.path.join(dataset_dir, "in/disp")
+disp_vis_dir = os.path.join(dataset_dir, "in/disp_vis")
 
-os.makedirs(out_dir, exist_ok=True)
+os.makedirs(depth_dir, exist_ok=True)
+os.makedirs(depth_vis_dir, exist_ok=True)
+os.makedirs(disp_vis_dir, exist_ok=True)
 
 cam3_ex_mat = [
     [0.999727, 0.0169459, 8.10469e-05, 0.250893],
@@ -29,35 +34,15 @@ cam2_ex_mat = [
 cam3_in_mat = [[31370.2, 0, 2446.95, 0], [0, 30142.5, 583.125, 0], [0, 0, 1, 0]]
 cam2_in_mat = [[31204.7, 0, 2831.44, 0], [0, 30502.2, 1866.63, 0], [0, 0, 1.0, 0]]
 
-in_ex_left = cam3_in_mat, cam3_ex_mat
-in_ex_right = cam2_in_mat, cam2_ex_mat
-
-max_disp_arr = []
-min_disp_arr = []
-
 for item in tqdm(sorted(os.listdir(pcd_dir))):
     pcd_path = os.path.join(pcd_dir, item)
     item_name = os.path.splitext(item)[0]
     img_path = os.path.join(img_dir, f"{item_name}.png")
-    out_path = os.path.join(out_dir, f"{item_name}.png")
+    depth_path = os.path.join(depth_dir, f"{item_name}.png")
+    depth_vis_path = os.path.join(depth_vis_dir, f"{item_name}.png")
+    disp_path = os.path.join(disp_dir, f"{item_name}.png")
+    disp_vis_path = os.path.join(disp_vis_dir, f"{item_name}.png")
 
-    max_disp, min_disp = pcd2disp(pcd_path, in_ex_left, in_ex_right, out_path)
-
-    max_disp_arr.append(max_disp)
-    min_disp_arr.append(min_disp)
-
-np.save(os.path.join(dataset_dir, "max_disp_arr.npy"), np.array(max_disp_arr))
-np.save(os.path.join(dataset_dir, "min_disp_arr.npy"), np.array(min_disp_arr))
-
-max_disp_arr = np.load(
-    os.path.join(dataset_dir, "max_disp_arr.npy"), allow_pickle=True
-).tolist()
-min_disp_arr = np.load(
-    os.path.join(dataset_dir, "min_disp_arr.npy"), allow_pickle=True
-).tolist()
-
-print(f"max disp: {max(max_disp_arr)}")
-print(f"min disp: {min(min_disp_arr)}")
-
-print(max_disp_arr)
-print(min_disp_arr)
+    # pcd2depth1(pcd_path, cam3_in_mat, cam3_ex_mat, depth_path)
+    depth_overlay1(depth_path, img_path, depth_vis_path)
+    depth_overlay1(disp_path, img_path, disp_vis_path)

@@ -1,14 +1,19 @@
 import os
 import shutil
 
-datasets_dir = "datasets/test_5_5"
+datasets_dir = "datasets/test_7_13_temp"
 
 src_dirs = []
-for item in os.listdir(datasets_dir):
-    if os.path.isdir(os.path.join(datasets_dir, item)) and item != "in" and item != "out" and item != "May_5_RoadTest":
+for item in sorted(os.listdir(datasets_dir)):
+    if (
+        os.path.isdir(os.path.join(datasets_dir, item))
+        and item != "in"
+        and item != "out"
+        and item != "May_5_RoadTest"
+    ):
         src_dirs.append(os.path.join(datasets_dir, item))
 
-des_dir = "datasets/test_5_5/in"
+des_dir = "datasets/test_7_13_temp/in"
 des_cam2_dir = os.path.join(des_dir, "cam2_img")
 des_cam3_dir = os.path.join(des_dir, "cam3_img")
 des_lidar_dir = os.path.join(des_dir, "lidar")
@@ -35,7 +40,9 @@ with open(log_file_path, "w") as log_file:
 
         pre_count = count
 
-        sorted_files = sorted(os.listdir(src_lidar_dir), key=lambda x: int(os.path.splitext(x)[0]))
+        sorted_files = sorted(
+            os.listdir(src_lidar_dir), key=lambda x: int(os.path.splitext(x)[0])
+        )
         for item in sorted_files:
             src_name = os.path.splitext(item)[0]
             des_name = str(count)

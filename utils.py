@@ -6,8 +6,10 @@ import cv2
 import png
 import statistics
 import tqdm
+
 # import math
 from collections import Counter
+
 # from PIL import Image
 
 
@@ -54,15 +56,17 @@ def pcd2depth(pcd_path, width, height, in_mat, ex_mat, out_path):
     non_zero_mask = depth_map > 0
     depth_map[non_zero_mask] = max_depth - depth_map[non_zero_mask]
 
-    with open(out_path, 'wb') as f:
-        writer = png.Writer(width=depth_map.shape[1],
-                            height=depth_map.shape[0],
-                            bitdepth=16,
-                            greyscale=True)
+    with open(out_path, "wb") as f:
+        writer = png.Writer(
+            width=depth_map.shape[1],
+            height=depth_map.shape[0],
+            bitdepth=16,
+            greyscale=True,
+        )
         writer.write(f, depth_map.tolist())
 
 
-def pcd2depth1(pcd_path, width, height, in_mat, ex_mat, out_path):
+def pcd2depth1(pcd_path, in_mat, ex_mat, out_path, width=5472, height=3648):
     pcd = o3d.io.read_point_cloud(pcd_path)
     points = np.asarray(pcd.points)  # (N, 3)
 
@@ -103,11 +107,13 @@ def pcd2depth1(pcd_path, width, height, in_mat, ex_mat, out_path):
     non_zero_mask = depth_map > 0
     depth_map[non_zero_mask] = max_depth - depth_map[non_zero_mask]
 
-    with open(out_path, 'wb') as f:
-        writer = png.Writer(width=depth_map.shape[1],
-                            height=depth_map.shape[0],
-                            bitdepth=16,
-                            greyscale=True)
+    with open(out_path, "wb") as f:
+        writer = png.Writer(
+            width=depth_map.shape[1],
+            height=depth_map.shape[0],
+            bitdepth=16,
+            greyscale=True,
+        )
         writer.write(f, depth_map.tolist())
 
 
@@ -115,11 +121,13 @@ def depth_overlay(depth_path, img_path, out_path):
     orig_image = cv2.imread(img_path)
     depth_image = cv2.imread(depth_path)
 
-    depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX).astype(
+        np.uint8
+    )
     depth_colored = cv2.applyColorMap(depth_normalized, cv2.COLORMAP_JET)
 
     alpha = 0.6
-    overlaid_image = cv2.addWeighted(orig_image, 1-alpha, depth_colored, alpha, 0)
+    overlaid_image = cv2.addWeighted(orig_image, 1 - alpha, depth_colored, alpha, 0)
 
     cv2.imwrite(out_path, overlaid_image)
 
@@ -132,7 +140,7 @@ def depth_overlay1(depth_path, img_path, out_path):
     valid_mask = depth_map > 0
     v, u = np.where(valid_mask)
 
-    depth = (65535 * depth_map[v, u] / 500)
+    depth = depth_map[v, u] / 256
     min_depth, max_depth = depth.min(), depth.max()
     depth_norm = ((max_depth - depth) / (max_depth - min_depth) * 255).astype(np.uint8)
 
@@ -149,7 +157,6 @@ def depth_overlay1(depth_path, img_path, out_path):
 
     orig_image_bgr = cv2.cvtColor(orig_img, cv2.COLOR_RGB2BGR)
     cv2.imwrite(out_path, orig_image_bgr)
-
 
 
 def get_stats(pcd_path, width, height, in_mat, ex_mat):
@@ -214,7 +221,7 @@ def eliminate_offset(img1, img2, block_h=3000, step=100):
     for y in range(0, height, step):
         if y + block_h > height:
             break
-        cropped = img1[y:y+block_h, :]
+        cropped = img1[y : y + block_h, :]
         result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
         _, _, _, max_loc = cv2.minMaxLoc(result)
         _, match_top = max_loc
@@ -249,7 +256,7 @@ def report_avg_offset(img1_path, img2_path, name, block_h=3000, step=100):
     height, width, _ = img1.shape
     y = 0
     while y + block_h < height - step:
-        cropped = img1[y:min(y+block_h, height), :]
+        cropped = img1[y : min(y + block_h, height), :]
         result = cv2.matchTemplate(img2, cropped, cv2.TM_CCOEFF_NORMED)
         _, _, _, max_loc = cv2.minMaxLoc(result)
         _, match_top = max_loc
@@ -270,7 +277,9 @@ def report_error(img1_path, img2_path):
     target_block = img1[:target_block_height, :]
 
     result = cv2.matchTemplate(img2, target_block, cv2.TM_CCOEFF_NORMED)
-    _, _, _, max_loc = cv2.minMaxLoc(result)  # the top left corner of best matched area from right image
+    _, _, _, max_loc = cv2.minMaxLoc(
+        result
+    )  # the top left corner of best matched area from right image
     _, y_best_match = max_loc  # the y coordinate of top left corner best match
 
     vertical_offset = y_best_match
@@ -288,7 +297,9 @@ def find_best_match_px(target_px, px_list):
     return best_match_index
 
 
-def pcd2disp_pn(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size=(5472, 3648)):
+def pcd2disp_pn(
+    pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size=(5472, 3648)
+):
     width = size[0]
     height = size[1]
 
@@ -347,7 +358,16 @@ def pcd2disp_pn(pcd_path, left_img_path, in_ex_left, in_ex_right, out_path, size
     return neg_disp_arr, pos_disp_arr
 
 
-def pcd2disp_pn_lr(pcd_path, left_img_path, right_img_path, in_ex_left, in_ex_right, left_out_path, right_out_path, size=(5472, 3648)):
+def pcd2disp_pn_lr(
+    pcd_path,
+    left_img_path,
+    right_img_path,
+    in_ex_left,
+    in_ex_right,
+    left_out_path,
+    right_out_path,
+    size=(5472, 3648),
+):
     width = size[0]
     height = size[1]
 
